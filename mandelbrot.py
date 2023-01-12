@@ -14,16 +14,19 @@ default_cycle = np.array([
 ])
 
 
-class KBrot:
-    """Represents a k-brot set with lemniscates visualized in the plane."""
+class Fractal:
+    """
+    # TODO: documentation
+    """
 
     _NOT_ESCAPED = -1
 
-    def __init__(self, k=2, maxiter=100, color_cycle=default_cycle):
+    def __init__(self, k=2, maxiter=100, color_cycle=default_cycle, julia_param=None):
         self._k = k
         self._maxiter = maxiter
         self._cycle = color_cycle
         self._period = len(color_cycle)
+        self._jp = julia_param
 
     '''def _escape_time_point(self, z0: complex) -> int:
         map = lambda z: z ** self._k + z0
@@ -34,8 +37,12 @@ class KBrot:
             zn = map(zn)
         return self._NOT_ESCAPED'''
 
+    # TODO: suppress overflow warnings from exploding orbits
     def _escape_time(self, z0: np.ndarray) -> np.ndarray:
-        map = lambda z: z ** self._k + z0
+        if self._jp is None:
+            map = lambda z: z ** self._k + z0
+        else:
+            map = lambda z: z ** self._k + self._jp
         zn = z0
         times = self._NOT_ESCAPED * np.ones_like(zn, dtype=int)
         for it in range(self._maxiter):
@@ -43,7 +50,7 @@ class KBrot:
             zn = map(zn)
         return times
 
-    def z2rgb(self, z) -> np.ndarray:
+    def z2rgb(self, z: np.ndarray) -> np.ndarray:
         """Map complex numbers to the colors corresponding to their escape times."""
         times = self._escape_time(z)
         modded_times = times % self._period
@@ -54,13 +61,13 @@ class KBrot:
         return result
 
 
-class Visualizer(KBrot):
+class Visualizer(Fractal):
     """
-    Wrapper class for KBrot which creates an image of the fractal.
+    Wrapper class for Fractal which creates an image of the fractal.
     Parameters include complex coordinates for the top left and
     bottom right corners of the viewing window, and the number of
     pixels per unit distance in the plane, which controls the
-    resolution. Additional keyword arguments are passed to the KBrot
+    resolution. Additional keyword arguments are passed to the Fractal
     constructor.
     """
 
@@ -69,7 +76,6 @@ class Visualizer(KBrot):
         self._tl = topleft
         self._br = bottomright
         self._ppu = pixels_per_unit
-
         self._u_max = int(pixels_per_unit * (bottomright.real - topleft.real))
         self._v_max = int(pixels_per_unit * (topleft.imag - bottomright.imag))
 
@@ -81,9 +87,7 @@ class Visualizer(KBrot):
 
     def image(self):
         """Return the image."""
-        u_grid, v_grid = np.meshgrid(
-            np.arange(self._u_max), np.arange(self._v_max)
-        )
+        u_grid, v_grid = np.meshgrid(np.arange(self._u_max), np.arange(self._v_max))
         z_grid = self.uv2z(u_grid, v_grid)
         return self.z2rgb(z_grid)
 
