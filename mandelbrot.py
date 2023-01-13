@@ -5,18 +5,30 @@ import numpy as np
 black = np.array([0, 0, 0])
 white = np.array([1, 1, 1])
 red = np.array([1, 0, 0])
+purple = np.array([1, 0, 1])
 
 # linearly interpolates between white and red over N steps.
 N = 5
 default_cycle = np.array([
-    white * (1 - n / N) + red * (n / N)
+    white * (1 - n / N) + purple * (n / N)
     for n in range(N + 1)
 ])
 
 
 class Fractal:
     """
-    # TODO: documentation
+    This class represents a k-brot set or one of its corresponding filled Julia sets for visualization.
+    The z2rgb() function maps complex numbers to rgb pixel values according to a color scheme designed
+    to depict the fractal's interior and its lemniscates.
+
+    Parameters
+    ----------
+    k: degree of the iterated polynomial map, default is 2.
+    maxiter: number of iterations to test for divergence, default is 100.
+    color_cycle: a point whose orbit diverges after n iterations is colored by color_cycle[n % len(colorcycle)].
+                    Default color cycle linearly interpolates between two pretty colors.
+    julia_param: If this parameter is a point in the complex plane, then this object visualizes the Julia set
+                    corresponding to that point. Otherwise, it visualizes a k-brot set.
     """
 
     _NOT_ESCAPED = -1
@@ -59,36 +71,5 @@ class Fractal:
             result[modded_times == idx] = self._cycle[idx]
         result[times == self._NOT_ESCAPED] = black
         return result
-
-
-class Visualizer(Fractal):
-    """
-    Wrapper class for Fractal which creates an image of the fractal.
-    Parameters include complex coordinates for the top left and
-    bottom right corners of the viewing window, and the number of
-    pixels per unit distance in the plane, which controls the
-    resolution. Additional keyword arguments are passed to the Fractal
-    constructor.
-    """
-
-    def __init__(self, topleft=-2 + 2j, bottomright=2 - 2j, pixels_per_unit=200, **kwargs):
-        super().__init__(**kwargs)
-        self._tl = topleft
-        self._br = bottomright
-        self._ppu = pixels_per_unit
-        self._u_max = int(pixels_per_unit * (bottomright.real - topleft.real))
-        self._v_max = int(pixels_per_unit * (topleft.imag - bottomright.imag))
-
-    def uv2z(self, u, v):
-        """Convert from pixel coordinates to complex plane."""
-        re = self._tl.real + u / self._ppu
-        im = self._tl.imag - v / self._ppu
-        return re + im * 1j
-
-    def image(self):
-        """Return the image."""
-        u_grid, v_grid = np.meshgrid(np.arange(self._u_max), np.arange(self._v_max))
-        z_grid = self.uv2z(u_grid, v_grid)
-        return self.z2rgb(z_grid)
 
 
