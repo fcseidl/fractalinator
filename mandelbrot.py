@@ -8,7 +8,7 @@ red = np.array([1, 0, 0])
 purple = np.array([1, 0, 1])
 
 # linearly interpolates between white and red over N steps.
-N = 5
+N = 10
 default_cycle = np.array([
     white * (1 - n / N) + purple * (n / N)
     for n in range(N + 1)

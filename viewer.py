@@ -21,10 +21,10 @@ class Viewer:
     def __init__(
             self,
             fractal: Fractal,
-            topleft=-2 + 2j,
-            bottomright=2 - 2j,
-            pixels_per_unit=200,
-            input_transform=lambda z: z
+            topleft: complex=-2 + 2j,
+            bottomright: complex=2 - 2j,
+            pixels_per_unit: int=200,
+            input_transform: callable=lambda z: z
     ):
         self._fract = fractal
         self._tl = topleft
@@ -46,3 +46,4 @@ class Viewer:
         z_grid = self._uv2z(u_grid, v_grid)
         inputs = self._input_transform(z_grid)
         return self._fract.z2rgb(inputs)
+
