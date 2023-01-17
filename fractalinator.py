@@ -3,6 +3,7 @@ from mandelbrot import KBrot
 from viewer import Viewer
 from halo import Halo
 import imageio
+import color_cycles
 
 import matplotlib.pyplot as plt
 import sys
@@ -17,9 +18,10 @@ smoothness = 0.6
 tightness = 5.0
 seed = 1
 octaves = 5.0
+cycle = color_cycles.default
 
 # get arguments from command line
-# TODO: let user change color scheme, fract
+# TODO: let user control k, julia
 for i in range(len(sys.argv)):
     if sys.argv[i] in ('-h', '--help'):
         print('See the README.md on GitHub for fractalination help.')
@@ -49,6 +51,9 @@ for i in range(len(sys.argv)):
     elif sys.argv[i] in ('-v', '--octaves'):
         octaves = float(sys.argv[i + 1])
 
+    elif sys.argv[i] in ('-c', '--coloring'):
+        cycle = color_cycles.cycle_dict[sys.argv[i + 1]]
+
 # check arguments
 if infile[-4:] != '.png':
     raise ValueError('infile must be in .png format')
@@ -60,7 +65,10 @@ if min(resolution, smoothness, tightness, seed, octaves) <= 0:
     raise ValueError('all numerical arguments must be positive')
 
 # starred arguments controllable from command line
-fract = KBrot(k=2)
+fract = KBrot(
+    k=2,
+    color_cycle=cycle               #
+)
 guides, tl, br = imageio.guides_from_image(
     infile,                         #
     inverted=invert                 #

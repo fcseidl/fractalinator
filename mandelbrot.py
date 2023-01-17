@@ -1,18 +1,6 @@
 
 import numpy as np
-
-
-black = np.array([0, 0, 0])
-white = np.array([1, 1, 1])
-red = np.array([1, 0, 0])
-purple = np.array([1, 0, 1])
-
-# linearly interpolates between white and red over N steps.
-N = 10
-default_cycle = np.array([
-    white * (1 - n / N) + purple * (n / N)
-    for n in range(N + 1)
-])
+import color_cycles
 
 
 class KBrot:
@@ -37,7 +25,7 @@ class KBrot:
 
     _NOT_ESCAPED = -1
 
-    def __init__(self, k=2, maxiter=100, color_cycle=default_cycle, julia_param=None):
+    def __init__(self, k=2, maxiter=100, color_cycle=color_cycles.default, julia_param=None):
         self._k = k
         self._maxiter = maxiter
         self._cycle = color_cycle
@@ -64,7 +52,7 @@ class KBrot:
         result = np.zeros(z.shape + (3,))
         for idx in range(self._period):
             result[modded_times == idx] = self._cycle[idx]
-        result[times == self._NOT_ESCAPED] = black
+        result[times == self._NOT_ESCAPED] = color_cycles.black
         return result
 
 
