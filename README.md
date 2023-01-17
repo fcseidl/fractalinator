@@ -42,7 +42,7 @@ Note that versions other than those listed here probably work but have not been 
 
 ```-n/--inverted``` tells the program to invert the colors in the infile image before processing.
 
-```-r/--resolution``` is used to specify that the next argument is an integer which will control the resolution of the image. Using ```-r 50``` results in a pretty grainy image, while ```-r 300``` is quite crisp. The default is 200; this is the resolution of the image above.
+```-r/--resolution``` is used to specify that the next argument is an integer which will control the resolution of the image. Using ```-r 50``` results in a pretty grainy image, while ```-r 400``` is quite crisp. The default is 200.
 
 ```-s/--smoothness``` is used to specify that the next argument is a scalar value. Larger values tend to shrink jagged protrusions on the edges of your fractalinated lines. The default is 0.6.
 
