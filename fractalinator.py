@@ -20,7 +20,7 @@ seed = 1
 octaves = 5.0
 cycle = color_cycles.default
 
-# get arguments from command line
+# get arguments from command line``
 # TODO: let user control k, julia
 for i in range(len(sys.argv)):
     if sys.argv[i] in ('-h', '--help'):
@@ -32,6 +32,9 @@ for i in range(len(sys.argv)):
 
     elif sys.argv[i] in ('-o', '--outfile'):
         outfile = sys.argv[i + 1]
+
+    elif sys.argv[i] in ('-c', '--coloring'):
+        cycle = color_cycles.cycle_dict[sys.argv[i + 1]]
 
     elif sys.argv[i] in ('-n', '--inverted'):
         invert = True
@@ -50,9 +53,6 @@ for i in range(len(sys.argv)):
 
     elif sys.argv[i] in ('-v', '--octaves'):
         octaves = float(sys.argv[i + 1])
-
-    elif sys.argv[i] in ('-c', '--coloring'):
-        cycle = color_cycles.cycle_dict[sys.argv[i + 1]]
 
 # check arguments
 if infile[-4:] != '.png':
