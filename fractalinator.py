@@ -15,9 +15,9 @@ outfile = None
 invert = False
 resolution = 200
 smoothness = 0.6
-tightness = 5.0
+tightness = 7.0
 seed = 1
-octaves = 5.0
+octaves = 1.5
 cycle = color_cycles.default
 
 

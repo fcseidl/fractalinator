@@ -38,7 +38,8 @@ class Halo:
         self._nearest = NearestNeighbors(n_neighbors=1).fit(self._real_guides)
         self._smooth = smoothness
         self._tight = tightness ** smoothness
-        self._noise = PerlinNoise(octaves=octaves, seed=seed)
+        self._x_noise = PerlinNoise(octaves=octaves, seed=seed)
+        self._y_noise = PerlinNoise(octaves=octaves, seed=seed + 1)
 
     def __call__(self, z: np.ndarray) -> np.ndarray:
         # determine distances from guides
@@ -47,8 +48,9 @@ class Halo:
         real_flat_z = np.array([flat_z.real, flat_z.imag]).T
         dist, _ = self._nearest.kneighbors(real_flat_z)
         dist = dist[:, 0] ** self._smooth
-        # obtain (near-)uniform locally correlated angles
-        theta = np.array([self._noise(xy) for xy in real_flat_z]) * np.pi
+        # obtain uniform locally correlated angles
+        theta = [np.arctan2(self._x_noise(xy), self._y_noise(xy)) for xy in real_flat_z]
+        theta = np.array(theta)
         # rotate distances into complex plane to obtain halo
         h = self._tight * dist * np.exp(theta * 1j)
         return h.reshape(z.shape)
