@@ -3,16 +3,19 @@ import numpy as np
 from PIL import Image
 
 
-def guides_from_image(imagefile, threshold=128):
+def guides_from_image(infile, threshold=255, inverted=False):
     """
     Given a file name for an image, threshold the image into light/dark, and
     return the complex coordinates for the dark points as guides for a Halo.
     Also return top left and bottom right corners of the viewing window in
-    the complex plane.
+    the complex plane. Option to invert colors is given.
     """
-    image = Image.open(imagefile)
+    image = Image.open(infile)
     image = np.asarray(image)[:, :, :3].sum(axis=2)
-    guide_vu = np.argwhere(image < threshold)
+    if inverted:
+        guide_vu = np.argwhere(image > threshold)
+    else:
+        guide_vu = np.argwhere(image < threshold)
     guide_u = guide_vu[:, 1]    # png format is transposed relative to numpy
     guide_v = guide_vu[:, 0]
     # window is centered at origin with image aspect ratio and volume 8
@@ -28,3 +31,6 @@ def guides_from_image(imagefile, threshold=128):
     return guides, topleft, bottomright
 
 
+def dump_image(image, outfile):
+    """Dump a numpy image to .png."""
+    Image.fromarray(image).save(outfile)
