@@ -16,7 +16,7 @@ resolution = 200
 smoothness = 0.6
 tightness = 5.0
 seed = 1
-octaves = 6.0
+octaves = 5.0
 
 # get arguments from command line
 # TODO: let user change color scheme, fract

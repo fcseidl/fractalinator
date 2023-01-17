@@ -33,4 +33,5 @@ def guides_from_image(infile, threshold=255, inverted=False):
 
 def dump_image(image, outfile):
     """Dump a numpy image to .png."""
+    image = (255 * image).astype(np.uint8)
     Image.fromarray(image).save(outfile)
