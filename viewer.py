@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from mandelbrot import Fractal
+from mandelbrot import KBrot
 
 
 class Viewer:
@@ -10,7 +10,7 @@ class Viewer:
 
     Parameters
     ----------
-    fractal: a mandelbrot.Fractal instance to view.
+    fractal: a mandelbrot.KBrot instance to view.
     topleft: top left corner of viewing window in the complex plane. Default: -2+2j
     bottomright: bottom right corner of viewing window in the complex plane. Default: 2-2j
     pixels_per_unit: sets resolution so that a unit square in C contains this many pixels, squared. Default: 200
@@ -20,11 +20,11 @@ class Viewer:
 
     def __init__(
             self,
-            fractal: Fractal,
+            fractal: KBrot,
             topleft: complex=-2 + 2j,
             bottomright: complex=2 - 2j,
             pixels_per_unit: int=200,
-            input_transform: callable=lambda z: z
+            input_transform=lambda z: z
     ):
         self._fract = fractal
         self._tl = topleft

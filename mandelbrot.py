@@ -15,7 +15,7 @@ default_cycle = np.array([
 ])
 
 
-class Fractal:
+class KBrot:
     """
     This class represents a k-brot set or one of its corresponding filled Julia sets for visualization.
     The z2rgb() function maps complex numbers to rgb pixel values according to a color scheme designed
@@ -39,15 +39,6 @@ class Fractal:
         self._cycle = color_cycle
         self._period = len(color_cycle)
         self._jp = julia_param
-
-    '''def _escape_time_point(self, z0: complex) -> int:
-        map = lambda z: z ** self._k + z0
-        zn = z0
-        for it in range(self._maxiter):
-            if np.abs(zn) > 2:
-                return it
-            zn = map(zn)
-        return self._NOT_ESCAPED'''
 
     # TODO: suppress overflow warnings from exploding orbits
     def _escape_time(self, z0: np.ndarray) -> np.ndarray:
