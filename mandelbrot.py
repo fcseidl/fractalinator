@@ -23,12 +23,16 @@ class KBrot:
 
     Parameters
     ----------
-    k: degree of the iterated polynomial map, default is 2.
-    maxiter: number of iterations to test for divergence, default is 100.
-    color_cycle: a point whose orbit diverges after n iterations is colored by color_cycle[n % len(colorcycle)].
-                    Default color cycle linearly interpolates between two pretty colors.
-    julia_param: If this parameter is a point in the complex plane, then this object visualizes the Julia set
-                    corresponding to that point. Otherwise, it visualizes a k-brot set.
+    k:
+        degree of the iterated polynomial map, default is 2.
+    maxiter:
+        number of iterations to test for divergence, default is 100.
+    color_cycle:
+        a point whose orbit diverges after n iterations is colored by color_cycle[n % len(colorcycle)].
+        Default color cycle linearly interpolates between two pretty colors.
+    julia_param:
+        If this parameter is a point in the complex plane, then this object visualizes the Julia set
+        corresponding to that point. Otherwise, it visualizes a k-brot set.
     """
 
     _NOT_ESCAPED = -1

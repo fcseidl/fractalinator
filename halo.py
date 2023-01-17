@@ -11,32 +11,37 @@ class Halo:
 
     Parameters
     ----------
-    shape: An array of complex numbers used as guide points.
-    smoothness: float, larger values tend to shrink jagged protrusions on the boundary.
-    tightness: float, larger values tend to concentrate the fractal more closely
-                around the guide points.
-    seed: int, must be positive, random seed for reproducability.
-    octaves: float, parameter for Perlin noise. Smaller values tend to produce more
-                order in the resulting image.
+    guides:
+        An array of complex numbers used as guide points.
+    smoothness:
+        float, larger values tend to shrink jagged protrusions on the boundary.
+    tightness:
+        float, larger values tend to concentrate the fractal more closely
+        around the guide points.
+    seed:
+        int, must be positive, random seed for reproducability.
+    octaves:
+        float, parameter for Perlin noise. Smaller values tend to produce more
+        order in the resulting image.
     """
 
     def __init__(
             self,
-            shape: np.ndarray,
+            guides: np.ndarray,
             smoothness: float = 0.7,
             tightness: float = 1.5,
             seed: int = 1,
             octaves: float = 1,
     ):
         # store real and imaginary parts separately to comply with NearestNeighbors
-        self._real_shape = np.array([shape.real, shape.imag]).T
-        self._nearest = NearestNeighbors(n_neighbors=1).fit(self._real_shape)
+        self._real_guides = np.array([guides.real, guides.imag]).T
+        self._nearest = NearestNeighbors(n_neighbors=1).fit(self._real_guides)
         self._smooth = smoothness
         self._tight = tightness ** smoothness
         self._noise = PerlinNoise(octaves=octaves, seed=seed)
 
     def __call__(self, z: np.ndarray) -> np.ndarray:
-        # determine distances from shape
+        # determine distances from guides
         # must flatten and convert to (real, imag) to comply with NearestNeighbors
         flat_z = z.reshape(-1)
         real_flat_z = np.array([flat_z.real, flat_z.imag]).T
