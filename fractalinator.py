@@ -20,6 +20,7 @@ seed = 1
 octaves = 5.0
 cycle = color_cycles.default
 
+
 # get arguments from command line``
 # TODO: let user control k, julia
 for i in range(len(sys.argv)):
@@ -54,6 +55,7 @@ for i in range(len(sys.argv)):
     elif sys.argv[i] in ('-v', '--octaves'):
         octaves = float(sys.argv[i + 1])
 
+
 # check arguments
 if infile[-4:] != '.png':
     raise ValueError('infile must be in .png format')
@@ -63,6 +65,7 @@ if outfile is not None and outfile[-4:] != '.png':
 
 if min(resolution, smoothness, tightness, seed, octaves) <= 0:
     raise ValueError('all numerical arguments must be positive')
+
 
 # starred arguments controllable from command line
 fract = KBrot(
