@@ -1,4 +1,4 @@
-![fractalinator](logo.png)
+![fractalinator](gallery/logo.png)
 
 # fractalinator
 
@@ -6,7 +6,7 @@ This repository contains Python code for texturing words and simple drawings lik
 
 ## Overview
 
-The above image started as a simple doodle of a Dr. Doofenshmirtz-style ray gun, until it was *fractalinated!* To fractalinate your own drawing, follow the steps below:
+The above image started as a simple doodle of a Dr. Doofenshmirtz-style ray gun, until it was *fractalinated!* More similar images are at the bottom of this README! To fractalinate your own drawing, follow the steps below:
 1. Clone this repository: ```git clone https://github.com/fcseidl/fractalinator.git```
 2. Make sure you have the dependencies listed below.
 3. Screenshot the words or picture you wish to fractalinate, and save the screenshot as a ```.png``` file in your newly cloned ```fractalinator``` directory.
@@ -59,4 +59,13 @@ Mandelbrot fractal images are defined by coloring points in the complex plane ac
 To fractalinate a doodle we draw, imagine embedding that doodle as a curve $\gamma$ in the complex plane. We want a different function from $\mathbb{C}$ into RGB space, one which looks interesting near $\gamma$ instead of near the origin. To keep a fractal boundary, that function should have the form $$z \mapsto \text{mandelbrot}(h(z)).$$ Because the Mandelbrot function looks most interesting for small values of $z$, our transform $h(z)$ should assign small values near our curve $\gamma$. Because the contours of $h(z)$ will emanate from $\gamma$, I call $h(z)$ a "halo".
 
 The specific halo used by the fractalinator has the form $$h(z) = t^s \cdot \text{distance}(\gamma, z)^s \cdot e^{i\theta(z)}.$$ Multiplying by a power of the distance from the curve has the desired effect of assigning small $h(z)$ values near $\gamma$. Here $s$ and $t$ are the smoothness and tightness parameters controllable from the command line. They serve to tune the general fit of the resulting fractalination. Finally, $e^{i\theta(z)}$ is a randomly generated smooth field of complex units, which fan $h(z)$ out to nonzero angles in the complex plane. Without this term, the boundary of the fractalinated curve would be smooth and boring. With it, the fractalinated image is *locally diffeomorphic* to a Mandelbrot image. That is, if you zoom in far enough (almost) anywhere at high enough resolution, it will look as if you zoomed in on the Mandelbrot set. Try it!
+
+
+## Gallery
+
+![fractalinator](gallery/spirit.png)
+![fractalinator](gallery/galaxy.png)
+![fractalinator](gallery/valentine.png)
+![fractalinator](gallery/math.png)
+
 
