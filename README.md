@@ -2,7 +2,7 @@
 
 # fractalinator
 
-This repository contains Python code for texturing words and simple drawings like a Mandelbrot fractal. 
+This repository contains Python code for texturing words and simple drawings like a Mandelbrot fractal. The image above is one example; scroll down to the Gallery section to see a few more examples!
 
 ## Overview
 
