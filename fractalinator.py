@@ -14,8 +14,8 @@ infile = 'not provided'
 outfile = None
 invert = False
 resolution = 200
-smoothness = 0.6
-tightness = 7.0
+smoothness = 0
+tightness = 7
 seed = 1
 octaves = 1.5
 cycle = color_cycles.default
@@ -63,7 +63,7 @@ if infile[-4:] != '.png':
 if outfile is not None and outfile[-4:] != '.png':
     raise ValueError('outfile must be in .png format')
 
-if min(resolution, smoothness, tightness, seed, octaves) <= 0:
+if min(resolution, tightness, seed, octaves) <= 0:#if min(resolution, smoothness, tightness, seed, octaves) <= 0:
     raise ValueError('all numerical arguments must be positive')
 
 

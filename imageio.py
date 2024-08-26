@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 
 
-def guides_from_image(infile, threshold=700, inverted=False):
+def guides_from_image(infile, threshold=650, inverted=False):
     """
     Given a file name for an image, threshold the image into light/dark, and
     return the complex coordinates for the dark points as guides for a Halo.
