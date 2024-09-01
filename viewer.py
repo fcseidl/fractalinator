@@ -26,9 +26,9 @@ class Viewer:
     def __init__(
             self,
             fractal: KBrot,
-            topleft: complex=-2 + 2j,
-            bottomright: complex=2 - 2j,
-            pixels_per_unit: int=200,
+            topleft: complex = -2 + 2j,
+            bottomright: complex = 2 - 2j,
+            pixels_per_unit: int = 200,
             input_transform=lambda z: z
     ):
         self._fract = fractal
