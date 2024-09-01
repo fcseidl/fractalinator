@@ -6,8 +6,8 @@ from perlin_noise import PerlinNoise
 from glowbrush import GlowBrush
 
 
-width = 400
-height = 400
+width = 700
+height = 500
 
 
 def colorwheel(z):
@@ -37,9 +37,8 @@ u = np.exp(1j * theta)
 
 
 def filter(z):
-    z *= theta
-    return colorwheel(z)
+    return colorwheel(z * u)
 
 root = tk.Tk()
-GlowBrush(root, w=width, h=height, buffer=100, filter=filter)
+GlowBrush(root, w=width, h=height, spread=100, buffer=100, filter=filter)
 root.mainloop()

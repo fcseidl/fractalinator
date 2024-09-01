@@ -16,7 +16,7 @@ def np2image(arr):
 
 class GlowBrush:
 
-    def __init__(self, root, w, h, buffer, filter):
+    def __init__(self, root, w, h, spread, buffer, filter):
         self.canvas = tk.Canvas(root, width=w, height=h)
         self.canvas.bind("<B1-Motion>", self.stroke)
         self.canvas.pack()
@@ -28,7 +28,7 @@ class GlowBrush:
 
         # define blur of intensity around brushstrokes
         blur_width = 2 * buffer + 1
-        self.blur = np.ones((blur_width, blur_width))
+        self.blur = np.ones((blur_width, blur_width)) * spread
         for u in range(blur_width):
             for v in range(blur_width):
                 self.blur[u, v] /= ((u - buffer) ** 2 + (v - buffer) ** 2) + 1  # Laplace smoothing
