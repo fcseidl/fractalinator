@@ -16,15 +16,19 @@ def np2image(arr):
 
 class GlowBrush:
 
-    def __init__(self, root, w, h, spread, buffer, filter):
-        self.canvas = tk.Canvas(root, width=w, height=h)
+    def __init__(self, root, first_frame, spread, buffer, filt):
+        h, w, _ = first_frame.shape
+        self.canvas = tk.Canvas(root, width=w, height=h)    # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.stroke)
         self.canvas.pack()
 
-        self.buffered_intensity = np.zeros((h + 2 * buffer, w + 2 * buffer))    # transposed from tk
         self.buffer = buffer
-        self.filter = filter
-        self.img = None
+        self.buffered_intensity = np.zeros((h + 2 * buffer, w + 2 * buffer))
+        self.buffered_frame = np.zeros((h + 2 * buffer, w + 2 * buffer, 3))
+        self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
+        self.filter = filt
+        self.image = np2image(first_frame)
+        self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
 
         # define blur of intensity around brushstrokes
         blur_width = 2 * buffer + 1
@@ -35,20 +39,23 @@ class GlowBrush:
 
     def stroke(self, event):
         y, x = event.x, event.y
-        self.buffered_intensity[x:x + 2 * self.buffer + 1, y:y + 2 * self.buffer + 1] += self.blur
-        intensity = self.buffered_intensity[self.buffer:-self.buffer, self.buffer:-self.buffer]
-        arr = self.filter(intensity)
-        self.img = np2image(arr)
-        self.canvas.create_image(0, 0, anchor="nw", image=self.img)
+        changed_intensity = self.buffered_intensity[x:x + 2 * self.buffer + 1, y:y + 2 * self.buffer + 1]
+        changed_intensity += self.blur
+        changed_frame = self.filter(x, y, changed_intensity)
+        self.buffered_frame[x:x + 2 * self.buffer + 1, y:y + 2 * self.buffer + 1] = changed_frame
+        frame = self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer]
+        self.image = np2image(frame)
+        self.canvas.itemconfig(self.image_item, image=self.image)
 
 
-def basic_filter(raw):
-    return np.minimum(np.sqrt(raw), 1) * 255
+def basic_filter(_, __, raw):
+    grey = np.minimum(np.sqrt(raw), 1) * 255
+    return np.dstack([grey, grey, grey])
 
 
 def main():
     root = tk.Tk()
-    GlowBrush(root, 640, 480, 200, basic_filter)
+    GlowBrush(root, np.zeros((700, 1000, 3)), 10, 200, basic_filter)
     root.mainloop()
 
 
