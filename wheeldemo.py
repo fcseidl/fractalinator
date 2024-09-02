@@ -3,11 +3,11 @@ import numpy as np
 from matplotlib.colors import hsv_to_rgb
 from perlin_noise import PerlinNoise
 
-from glowbrush import GlowBrush
+from brush import Brush
 
 
-width = 1000
-height = 800
+width = 200
+height = 120
 buffer = 100
 
 
@@ -39,12 +39,12 @@ buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=comple
 buffered_unit[buffer:-buffer, buffer:-buffer] = unit
 
 
-def wheelfilter(u, v, raw):
+def wheelpaint(u, v, raw):
     a, b = raw.shape
     splayed = raw * buffered_unit[u:u + a, v:v + b]
     return colorwheel(splayed)
 
 
 root = tk.Tk()
-GlowBrush(root, 255 * np.ones((height, width, 3)), spread=100, buffer=100, filt=wheelfilter)
+Brush(root, 255 * np.ones((height, width, 3)), spread=100, buffer=100, paint=wheelpaint)
 root.mainloop()
