@@ -1,14 +1,15 @@
 import tkinter as tk
 import numpy as np
 from matplotlib.colors import hsv_to_rgb
-from perlin_noise import PerlinNoise
 
+from noise import noise
 from brush import Brush
 
 
-width = 200
-height = 120
-buffer = 100
+width = 640
+height = 480
+buffer = 200
+seed = 42
 
 
 def colorwheel(z):
@@ -23,18 +24,11 @@ def colorwheel(z):
 
 
 # obtain random smooth field of complex units
-norm = (width + height) / 10
-rnoise = PerlinNoise(octaves=1, seed=0)
-inoise = PerlinNoise(octaves=1, seed=1)
-x = np.arange(width) / norm + 20
-y = np.arange(height) / norm + 20
-x, y = np.meshgrid(x, y)
-x, y = x.reshape(-1), y.reshape(-1)
-theta = np.array([
-    np.arctan2(rnoise([xx, yy]), inoise([xx, yy]))
-    for xx, yy in zip(x, y)
-]).reshape(height, width)
-unit = np.exp(1j * theta)
+rad = (width + height) / 20
+real = noise((height, width), rad, seed=seed)
+imag = noise((height, width), rad, seed=seed + 22)
+angle = np.arctan2(real, imag)
+unit = np.exp(angle * 1j)
 buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
 buffered_unit[buffer:-buffer, buffer:-buffer] = unit
 
