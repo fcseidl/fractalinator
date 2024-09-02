@@ -17,14 +17,14 @@ def np2image(arr):
 class GlowBrush:
 
     def __init__(self, root, first_frame, spread, buffer, filt):
-        h, w, _ = first_frame.shape
-        self.canvas = tk.Canvas(root, width=w, height=h)    # transposed from numpy
+        self.h, self.w, _ = first_frame.shape
+        self.canvas = tk.Canvas(root, width=self.w, height=self.h)    # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.stroke)
         self.canvas.pack()
 
         self.buffer = buffer
-        self.buffered_intensity = np.zeros((h + 2 * buffer, w + 2 * buffer))
-        self.buffered_frame = np.zeros((h + 2 * buffer, w + 2 * buffer, 3))
+        self.buffered_intensity = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer))
+        self.buffered_frame = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer, 3))
         self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
         self.filter = filt
         self.image = np2image(first_frame)
@@ -38,11 +38,13 @@ class GlowBrush:
                 self.blur[u, v] /= ((u - buffer) ** 2 + (v - buffer) ** 2) + 1  # Laplace smoothing
 
     def stroke(self, event):
-        y, x = event.x, event.y
-        changed_intensity = self.buffered_intensity[x:x + 2 * self.buffer + 1, y:y + 2 * self.buffer + 1]
+        u, v = event.x, event.y
+        if u < 0 or v < 0 or u >= self.w or v >= self.h:    # check boundaries
+            return
+        changed_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         changed_intensity += self.blur
-        changed_frame = self.filter(x, y, changed_intensity)
-        self.buffered_frame[x:x + 2 * self.buffer + 1, y:y + 2 * self.buffer + 1] = changed_frame
+        changed_frame = self.filter(v, u, changed_intensity)
+        self.buffered_frame[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = changed_frame
         frame = self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer]
         self.image = np2image(frame)
         self.canvas.itemconfig(self.image_item, image=self.image)
