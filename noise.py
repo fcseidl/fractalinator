@@ -17,11 +17,41 @@ def circlemask(r):
     return (d < r * r)[1:, 1:]
 
 
+def kernelfilter(ker, eps=1e-2):
+    # find distance at which correlation is below eps
+    rmin, rmax = 2, 3
+    while ker(rmax) > eps:
+        rmin = rmax
+        rmax *= 2
+    while rmax - rmin > 1:
+        rmid = int((rmin + rmax) * .5)
+        if ker(rmid) > eps:
+            rmin = rmid
+        else:
+            rmax = rmid
+    # create convolution filter
+    d2 = d2fromcenter((2 * rmax, 2 * rmax))
+    return ker(d2)[1:, 1:]
+
+
+class RBF:
+    def __init__(self,s2):
+        self.gamma = 0.5 / s2
+    def __call__(self, d2):
+        return np.exp(-d2 * self.gamma)
+
+
 def convolve2d(A, B):
     """
     Convolve matrices using FFTs. Based on answer at
     https://stackoverflow.com/questions/43086557/convolve2d-just-by-using-numpy
     """
+    # check for filter as big as image
+    a1, a2 = A.shape
+    b1, b2 = B.shape
+    if b1 > a1 and b2 > a2:
+        raise Warning("Convolution filter is larger than image.")
+
     fa = fft2(A)
     fb = fft2(np.flipud(np.fliplr(B)), s=A.shape)
     m, n = B.shape
@@ -31,9 +61,10 @@ def convolve2d(A, B):
     return result
 
 
-def noise(shape: tuple, radius: float, seed: int = 0) -> np.ndarray:
+def noise(shape: tuple, s2: float, seed: int = 0) -> np.ndarray:
     np.random.seed(seed)
     white = np.random.randn(*shape)
-    filt = circlemask(radius)
+    ker = RBF(s2)
+    filt = kernelfilter(ker)
     filt = filt / filt.sum()
     return convolve2d(white, filt)
