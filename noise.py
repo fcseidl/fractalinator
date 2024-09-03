@@ -68,3 +68,14 @@ def noise(shape: tuple, s2: float, seed: int = 0) -> np.ndarray:
     filt = kernelfilter(ker)
     filt = filt / filt.sum()
     return convolve2d(white, filt)
+
+
+def unit_noise(**kwargs) -> np.ndarray:
+    if "seed" not in kwargs.keys():
+        kwargs["seed"] = 0
+    real = noise(**kwargs)
+    kwargs["seed"] += 22
+    imag = noise(**kwargs)
+    angle = np.arctan2(real, imag)
+    return np.exp(angle * 1j)
+

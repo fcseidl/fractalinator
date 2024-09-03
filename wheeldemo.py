@@ -2,12 +2,12 @@ import tkinter as tk
 import numpy as np
 from matplotlib.colors import hsv_to_rgb
 
-from noise import noise
+from noise import unit_noise
 from brush import Brush
 
 
-width = 640
-height = 480
+width = 1200
+height = 600
 buffer = 200
 seed = 42
 
@@ -24,11 +24,8 @@ def colorwheel(z):
 
 
 # obtain random smooth field of complex units
-rad = (width + height) / 20
-real = noise((height, width), rad, seed=seed)
-imag = noise((height, width), rad, seed=seed + 22)
-angle = np.arctan2(real, imag)
-unit = np.exp(angle * 1j)
+s2 = (width + height) / 30
+unit = unit_noise(shape=(height, width), s2=s2, seed=seed)
 buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
 buffered_unit[buffer:-buffer, buffer:-buffer] = unit
 
