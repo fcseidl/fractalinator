@@ -2,14 +2,7 @@ import tkinter as tk
 import numpy as np
 from matplotlib.colors import hsv_to_rgb
 
-from noise import unit_noise
-from brush import Brush
-
-
-width = 1200
-height = 600
-buffer = 200
-seed = 42
+from artwork import Artwork
 
 
 def colorwheel(z):
@@ -23,19 +16,15 @@ def colorwheel(z):
     return hsv_to_rgb(hsv) * 255
 
 
-# obtain random smooth field of complex units
-s2 = (width + height) / 30
-unit = unit_noise(shape=(height, width), s2=s2, seed=seed)
-buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
-buffered_unit[buffer:-buffer, buffer:-buffer] = unit
+w, h = (1000, 1000)
 
+Artwork(
+    width=w,
+    height=h,
+    brush_strength=70,
+    buffer=200,
+    paint=colorwheel,
+    noise_s2=(w + h) / 40,
+    noise_seed=24
+)
 
-def wheelpaint(u, v, raw):
-    a, b = raw.shape
-    splayed = raw * buffered_unit[u:u + a, v:v + b]
-    return colorwheel(splayed)
-
-
-root = tk.Tk()
-Brush(root, 255 * np.ones((height, width, 3)), spread=100, buffer=buffer, paint=wheelpaint)
-root.mainloop()
