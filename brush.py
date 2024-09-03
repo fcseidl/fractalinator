@@ -6,6 +6,8 @@ import tkinter as tk
 import numpy as np
 from PIL import Image, ImageTk
 
+from noise import d2fromcenter
+
 
 def np2image(arr):
     """Convert a numpy array into an image which can go on a tkinter canvas."""
@@ -30,13 +32,7 @@ class Brush:
         self.paint = paint
         self.image = np2image(first_frame)
         self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
-
-        # define blur of intensity around brushstrokes
-        blur_width = 2 * buffer + 1
-        self.blur = np.ones((blur_width, blur_width)) * spread
-        for u in range(blur_width):
-            for v in range(blur_width):
-                self.blur[u, v] /= ((u - buffer) ** 2 + (v - buffer) ** 2) + 1  # Laplace smoothing
+        self.blur = spread / d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
 
     def stroke(self, event):
         u, v = event.x, event.y
