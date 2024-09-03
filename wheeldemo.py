@@ -40,5 +40,5 @@ def wheelpaint(u, v, raw):
 
 
 root = tk.Tk()
-Brush(root, 255 * np.ones((height, width, 3)), spread=100, buffer=100, paint=wheelpaint)
+Brush(root, 255 * np.ones((height, width, 3)), spread=100, buffer=buffer, paint=wheelpaint)
 root.mainloop()
