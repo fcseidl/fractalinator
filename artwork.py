@@ -42,6 +42,7 @@ class Artwork:
 
         # tkinter set up to display and update artwork
         root = tk.Tk()
+        root.title("Paint Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
         self.canvas.pack()
