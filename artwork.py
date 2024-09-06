@@ -26,9 +26,13 @@ class Artwork:
                  noise_seed):
         self.w, self.h, = width, height
 
-        # set up brush and buffered layers of image
+        # set up brush
         self.buffer = buffer
-        self.brush = brush_strength / d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
+        d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
+        self.brush = brush_strength / d2
+        self.brush[d2 > d2.max() / 2] = 0       # circular mask
+
+        # create buffered image layers
         unit = unit_noise(shape=(self.h, self.w), s2=noise_s2, seed=noise_seed)
         self.buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
         self.buffered_unit[buffer:-buffer, buffer:-buffer] = unit
@@ -37,7 +41,7 @@ class Artwork:
 
         # paint first frame
         self.paint = paint
-        first_frame = paint(np.zeros((self.h, self.w), dtype=complex))
+        first_frame = paint(50 * np.ones((self.h, self.w), dtype=complex))
         self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
 
         # tkinter set up to display and update artwork
@@ -56,7 +60,8 @@ class Artwork:
             return
         new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_intensity += self.brush
-        new_z = new_intensity * self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
+        new_z = np.sqrt(1 / (new_intensity + (0.000001 + 0j)))
+        new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_rgb = self.paint(new_z)
         self.buffered_frame[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
         frame = self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer]

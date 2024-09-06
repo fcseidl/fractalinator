@@ -4,6 +4,7 @@ from artwork import Artwork
 
 def paint(z0):
     # compute escape time map
+    #z0 = 1 / z0
     zn = z0
     fun = lambda z: z * z + z0
     time = np.zeros(z0.shape, dtype=int)
@@ -23,8 +24,8 @@ w, h = (1000, 1000)
 Artwork(
     width=w,
     height=h,
-    brush_strength=100,
-    buffer=150,
+    brush_strength=80,
+    buffer=90,
     paint=paint,
     noise_s2=(w + h) / 100,
     noise_seed=24
