@@ -1,4 +1,4 @@
-from numpy.fft import rfftn, irfftn
+from numpy.fft import rfftn, irfftn, fft2, ifft2
 import numpy as np
 
 
@@ -50,7 +50,7 @@ def rbf_filter(sigma, nsig, resolution, dimension) -> np.ndarray:
     w = 2 * hw + 1
     shape = tuple(w for _ in range(dimension))
     d2 = d2fromcenter(shape, resolution)
-    filt = np.exp(-d2 * sigma * sigma)  # convolution of Gaussian is Gaussian
+    filt = np.exp(-d2 / (sigma * sigma))  # convolution of Gaussian is Gaussian
     return filt / filt.sum()
 
 
@@ -117,14 +117,22 @@ def main():
     import matplotlib.pyplot as plt
 
     n = noise(
-        shape=(1, 1),
-        resolution=250,
-        rbf_sigma=0.1,
-        periodic=True
+        shape=(1, 1, 1),
+        resolution=50,
+        rbf_sigma=.1,
+        rbf_nsig=2.
     )
 
-    n = np.roll(n, (100, 100), (0, 1))
-    plt.imshow(n)
+    #n = np.roll(n, (100, 100), (0, 1))
+    plt.imshow(n[0])
+    plt.colorbar()
+    plt.show()
+
+    plt.imshow(n[1])
+    plt.colorbar()
+    plt.show()
+
+    plt.imshow(n[2])
     plt.colorbar()
     plt.show()
 
