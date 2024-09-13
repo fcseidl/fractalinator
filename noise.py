@@ -5,7 +5,8 @@ import numpy as np
 def d2fromcenter(shape, resolution):
     """
     Create an array of the requested shape where each index holds its squared
-    distance from the center index, in units of resolution grid cells.
+    distance from the center index, if the number of grid cells per unit is given
+    by the resolution.
     """
     grid = np.ogrid[*(slice(0, s) for s in shape), ]
     return sum(((g - s/2 + 0.5) / resolution)**2 for g, s in zip(grid, shape))
@@ -117,22 +118,15 @@ def main():
     import matplotlib.pyplot as plt
 
     n = noise(
-        shape=(1, 1, 1),
-        resolution=50,
+        shape=(1, 1),
+        resolution=1000,
         rbf_sigma=.1,
-        rbf_nsig=2.
+        rbf_nsig=2.,
+        periodic=True
     )
 
-    #n = np.roll(n, (100, 100), (0, 1))
-    plt.imshow(n[0])
-    plt.colorbar()
-    plt.show()
-
-    plt.imshow(n[1])
-    plt.colorbar()
-    plt.show()
-
-    plt.imshow(n[2])
+    n = np.roll(n, (100, 100), (0, 1))
+    plt.imshow(n)
     plt.colorbar()
     plt.show()
 
