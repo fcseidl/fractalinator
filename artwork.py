@@ -22,18 +22,18 @@ class Artwork:
                  brush_strength,
                  buffer,
                  paint,
-                 noise_s2,
+                 noise_sig,
                  noise_seed):
         self.w, self.h, = width, height
 
         # set up brush
         self.buffer = buffer
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
-        self.brush = brush_strength / d2
+        self.brush = brush_strength / (d2 + 1e-7)   # Laplace smoothed
         self.brush[d2 > d2.max() / 2] = 0       # circular mask
 
         # create buffered image layers
-        unit = unit_noise(shape=(self.h, self.w), s2=noise_s2, seed=noise_seed)
+        unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
         self.buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
         self.buffered_unit[buffer:-buffer, buffer:-buffer] = unit
         self.buffered_intensity = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer))

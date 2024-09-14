@@ -2,7 +2,7 @@ from numpy.fft import rfftn, irfftn, fft2, ifft2
 import numpy as np
 
 
-def d2fromcenter(shape, resolution):
+def d2fromcenter(shape, resolution=1):
     """
     Create an array of the requested shape where each index holds its squared
     distance from the center index, if the number of grid cells per unit is given
@@ -105,24 +105,29 @@ def noise(
 
 
 def unit_noise(**kwargs) -> np.ndarray:
+    """
+    Create a field of spatially correlated complex unit noise. Keyword arguments are used
+    as in noise().
+    """
     if "seed" not in kwargs.keys():
         kwargs["seed"] = 0
     real = noise(**kwargs)
     kwargs["seed"] += 22
     imag = noise(**kwargs)
-    angle = np.arctan2(real, imag)
-    return np.exp(angle * 1j)
+    z = real + 1j * imag
+    z /= np.abs(z)
+    return z
 
 
 def main():
     import matplotlib.pyplot as plt
 
     n = noise(
-        shape=(1, 1),
-        resolution=1000,
-        rbf_sigma=.1,
+        shape=(100, 100),
+        resolution=10,
+        rbf_sigma=10,
         rbf_nsig=2.,
-        periodic=True
+        periodic=False
     )
 
     n = np.roll(n, (100, 100), (0, 1))
