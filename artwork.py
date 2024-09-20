@@ -14,6 +14,12 @@ def np2image(arr):
                 np.uint8)))
 
 
+def smoothmax(x, y, alpha=3.):
+    eax = np.exp(alpha * x)
+    eay = np.exp(alpha * y)
+    return (x * eax + y * eay) / (eax + eay)
+
+
 class Artwork:
 
     def __init__(self,
@@ -28,15 +34,13 @@ class Artwork:
 
         # set up brush
         self.buffer = buffer
-        d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
-        self.brush = brush_strength / (d2 + 1e-7)   # Laplace smoothed
-        self.brush[d2 > d2.max() / 2] = 0       # circular mask
+        self.dist = np.sqrt(d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1), resolution=50))
 
         # create buffered image layers
         unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
         self.buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
         self.buffered_unit[buffer:-buffer, buffer:-buffer] = unit
-        self.buffered_intensity = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer))
+        self.buffered_mod = 50 * np.ones((self.h + 2 * buffer, self.w + 2 * buffer))
         self.buffered_frame = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer, 3))
 
         # paint first frame
@@ -58,10 +62,10 @@ class Artwork:
         u, v = event.x, event.y
         if u < 0 or v < 0 or u >= self.w or v >= self.h:  # check boundaries
             return
-        new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
-        new_intensity += self.brush
-        new_z = np.sqrt(1 / (new_intensity + (0.000001 + 0j)))
-        new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
+        new_mod = self.buffered_mod[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
+        new_mod = smoothmax(new_mod, self.dist, alpha=-3)
+        self.buffered_mod[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_mod
+        new_z = new_mod * self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_rgb = self.paint(new_z)
         self.buffered_frame[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
         frame = self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer]
