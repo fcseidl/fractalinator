@@ -18,8 +18,8 @@ def np2image(arr):
 class Artwork:
 
     def __init__(self, width, height, *,
-                 brush_strength=100,
-                 buffer=100,
+                 brush_strength=200,
+                 brush_radius=300,
                  power=2.,
                  cmap_name='twilight_shifted',
                  noise_sig=30,
@@ -27,7 +27,7 @@ class Artwork:
                  thin_it=5,
                  n_it=80):
         self.w, self.h, self.buffer, self.p_inv, self.cmap, self.thin_it, self.n_it \
-            = width, height, buffer, 1 / power, colormaps[cmap_name], thin_it, n_it
+            = width, height, brush_radius, 1 / power, colormaps[cmap_name], thin_it, n_it
 
         # set up brush
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
@@ -36,10 +36,10 @@ class Artwork:
 
         # create buffered image layers
         unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
-        self.buffered_unit = np.zeros((2 * buffer + height, 2 * buffer + width), dtype=complex)
-        self.buffered_unit[buffer:-buffer, buffer:-buffer] = unit
-        self.buffered_mod = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer))
-        self.buffered_frame = np.zeros((self.h + 2 * buffer, self.w + 2 * buffer, 3))
+        self.buffered_unit = np.zeros((2 * brush_radius + height, 2 * brush_radius + width), dtype=complex)
+        self.buffered_unit[brush_radius:-brush_radius, brush_radius:-brush_radius] = unit
+        self.buffered_mod = np.zeros((self.h + 2 * brush_radius, self.w + 2 * brush_radius))
+        self.buffered_frame = np.zeros((self.h + 2 * brush_radius, self.w + 2 * brush_radius, 3))
 
         # paint first frame
         first_frame = self.color(50 * np.ones((self.h, self.w), dtype=complex))
@@ -78,9 +78,12 @@ class Artwork:
                 zn = zn * zn * zn + z0
 
         smooth[ind] = smooth_
-        smooth[smooth < 0] = 0.
+        interior = (smooth < 0)
+        smooth[interior] = 0.
         smooth = (smooth / self.n_it) ** self.p_inv
-        return 255 * self.cmap(smooth)[:, :, :3]
+        result = 255 * self.cmap(smooth)[:, :, :3]
+        result[interior] = 0
+        return result
 
     def paint_stroke(self, event):
         u, v = event.x, event.y

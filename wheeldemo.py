@@ -22,7 +22,7 @@ Artwork(
     width=w,
     height=h,
     brush_strength=70,
-    buffer=200,
+    brush_radius=200,
     paint=colorwheel,
     noise_s2=(w + h) / 40,
     noise_seed=24
