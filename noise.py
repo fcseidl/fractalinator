@@ -109,7 +109,7 @@ def unit_noise(**kwargs) -> np.ndarray:
     Create a field of spatially correlated complex unit noise. Keyword arguments are used
     as in noise().
     """
-    if "seed" not in kwargs.keys():
+    if "seed" not in kwargs.keys() or kwargs["seed"] is None:
         kwargs["seed"] = 0
     real = noise(**kwargs)
     kwargs["seed"] += 22
