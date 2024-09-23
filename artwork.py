@@ -18,39 +18,41 @@ def np2image(arr):
 class Artwork:
 
     def __init__(self, width, height, *,
-                 brush_strength=50,
+                 brush_strength=75,
                  brush_radius=100,
-                 power=2,
+                 power=3,
                  cmap_name='twilight_shifted',
-                 cmap_period=1,
+                 cmap_period=8,
                  noise_sig=30,
                  noise_seed=None,
-                 thin_it=5,
-                 iterations=60):
+                 thin_it=7,
+                 iterations=40):
         self.w, self.h, = width, height
         self.buffer, self.power, self.mpl_cmap, self.period, self.thin_it, self.n_it \
             = brush_radius, power, colormaps[cmap_name], cmap_period, thin_it, iterations
-        self.norm = 1 - np.exp(-(2 ** power + 2))
+        self.bailout_radius = 10
 
         # set up brush
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
         self.brush = brush_strength / (d2 + 1e-7)  # Laplace smoothed
-        self.brush[d2 > d2.max() / 2] = 0
+        d2max = d2.max() / 2
+        self.brush[d2 > d2max] = 0
 
         # create buffered image layers
         unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
-        self.buffered_unit = np.zeros((2 * brush_radius + height, 2 * brush_radius + width), dtype=complex)
+        buffered_shape = (2 * brush_radius + height, 2 * brush_radius + width)
+        self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer] = unit
-        self.buffered_intensity = np.zeros((self.h + 2 * brush_radius, self.w + 2 * brush_radius))
-        self.buffered_frame = np.zeros((self.h + 2 * brush_radius, self.w + 2 * brush_radius, 3))
+        self.buffered_intensity = np.zeros((2 * brush_radius + height, 2 * brush_radius + width))
+        self.buffered_frame = np.zeros(buffered_shape + (3,))
 
         # paint first frame
-        first_frame = self.z2rgb(50 * np.ones((self.h, self.w), dtype=complex))
+        first_frame = self.z2rgb(self.bailout_radius * np.ones((self.h, self.w), dtype=complex))
         self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
 
         # tkinter set up to display and update artwork
         root = tk.Tk()
-        root.title("Paint Something!")
+        root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
 
@@ -64,6 +66,7 @@ class Artwork:
 
     def t2rgb(self, t):
         """Maps from (smoothed) escape times to rgb space."""
+        t = np.maximum(t - 1, 0)    # ensures outside starts at 0 on cmap
         s = (t % self.period) / self.period
         i = (t / self.period).astype(int)   # how many cycles
         reverse = (i % 2) == 1
@@ -75,21 +78,21 @@ class Artwork:
         zn = z0
         t = -1 * np.ones(z0.shape)          # smooth escape time
 
-        for it in range(self.thin_it):
+        for it in range(min(self.n_it, self.thin_it)):
             azn = np.abs(zn)
-            escaped = (azn > 2) & (t < 0)
-            t[escaped] = it + np.exp(2 - azn[escaped])
+            escaped = (azn > self.bailout_radius) & (t < 0)
+            t[escaped] = it + np.exp(1 - azn[escaped] / self.bailout_radius)
             zn[t >= 0] = 0     # prevent overflow warning
             zn = zn ** self.power + z0
 
         # avoid redundant computation for early escaped points
-        ind = (t < 0) * (azn <= 2)  # not yet escaped
+        ind = (t < 0) * (azn <= self.bailout_radius)  # not yet escaped
         zn, z0, t_, = zn[ind], z0[ind], t[ind]
 
         for it in range(self.thin_it, self.n_it):
             azn = np.abs(zn)
-            escaped = (azn > 2) & (t_ < 0)
-            t_[escaped] = it + np.exp(2 - azn[escaped]) / self.norm
+            escaped = (azn > self.bailout_radius) & (t_ < 0)
+            t_[escaped] = it + np.exp(self.bailout_radius - azn[escaped])
             zn[t_ >= 0] = 0     # prevent overflow warning
             if it < self.n_it - 1:
                 zn = zn ** self.power + z0
@@ -115,7 +118,8 @@ class Artwork:
             return
         new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_intensity += self.brush
-        new_z = np.sqrt(1 / (new_intensity + (0.000001 + 0j)))
+        new_z = np.sqrt(1 / (new_intensity + 1e-7))
+        new_z = np.minimum(new_z, self.bailout_radius).astype(complex)
         new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_rgb = self.z2rgb(new_z)
         self.buffered_frame[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
