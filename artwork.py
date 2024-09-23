@@ -23,14 +23,14 @@ class Artwork:
                  power=3,
                  cmap_name='twilight_shifted',
                  cmap_period=8,
-                 noise_sig=30,
+                 noise_sig=26,
                  noise_seed=None,
+                 bailout_radius=2,
                  thin_it=7,
                  iterations=40):
         self.w, self.h, = width, height
-        self.buffer, self.power, self.mpl_cmap, self.period, self.thin_it, self.n_it \
-            = brush_radius, power, colormaps[cmap_name], cmap_period, thin_it, iterations
-        self.bailout_radius = 10
+        self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.n_it \
+            = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, iterations
 
         # set up brush
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
@@ -47,7 +47,7 @@ class Artwork:
         self.buffered_frame = np.zeros(buffered_shape + (3,))
 
         # paint first frame
-        first_frame = self.z2rgb(self.bailout_radius * np.ones((self.h, self.w), dtype=complex))
+        first_frame = self.z2rgb(self.bailout_radius * unit)
         self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
 
         # tkinter set up to display and update artwork
