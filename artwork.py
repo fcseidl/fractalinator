@@ -21,12 +21,12 @@ class Artwork:
                  brush_strength=75,
                  brush_radius=100,
                  power=3,
-                 cmap_name='twilight_shifted',
+                 cmap_name='gray_r',
                  cmap_period=8,
                  noise_sig=26,
                  noise_seed=None,
-                 bailout_radius=2,
-                 thin_it=7,
+                 bailout_radius=3,
+                 thin_it=5,
                  iterations=40):
         self.w, self.h, = width, height
         self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.n_it \
@@ -38,23 +38,24 @@ class Artwork:
         d2max = d2.max() / 2
         self.brush[d2 > d2max] = 0
 
-        # create buffered image layers
+        # create buffered layers in numpy
         unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
         buffered_shape = (2 * brush_radius + height, 2 * brush_radius + width)
         self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer] = unit
         self.buffered_intensity = np.zeros((2 * brush_radius + height, 2 * brush_radius + width))
-        self.buffered_frame = np.zeros(buffered_shape + (3,))
-
-        # paint first frame
+        self.buffered_rgb = np.zeros(buffered_shape + (3,))
         first_frame = self.z2rgb(self.bailout_radius * unit)
-        self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
+        self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
 
         # tkinter set up to display and update artwork
         root = tk.Tk()
         root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
+
+
+
 
         # debug util
         self.canvas.bind("<Button-2>", self.debug_printout)
@@ -114,15 +115,23 @@ class Artwork:
 
     def paint_stroke(self, event):
         u, v = event.x, event.y
-        if u < 0 or v < 0 or u >= self.w or v >= self.h:  # check boundaries
+
+        # check boundaries
+        if u < 0 or v < 0 or u >= self.w or v >= self.h:
             return
+
+        # update intensity
         new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_intensity += self.brush
+
+        # update z and don't exceed bailout radius
         new_z = np.sqrt(1 / (new_intensity + 1e-7))
         new_z = np.minimum(new_z, self.bailout_radius).astype(complex)
         new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
+
+        # update colors in numpy
         new_rgb = self.z2rgb(new_z)
-        self.buffered_frame[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
-        frame = self.buffered_frame[self.buffer:-self.buffer, self.buffer:-self.buffer]
+        self.buffered_rgb[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
+        frame = self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer]
         self.image = np2image(frame)
         self.canvas.itemconfig(self.image_item, image=self.image)

@@ -1,4 +1,4 @@
 
 from artwork import Artwork
 
-Artwork(1000, 1000, cmap_name="gist_stern", noise_sig=25)
+Artwork(500, 500, bailout_radius=2, cmap_period=20, cmap_name="tab20b")
