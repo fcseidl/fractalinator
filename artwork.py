@@ -1,6 +1,7 @@
 
 import tkinter as tk
 import numpy as np
+import os
 from PIL import Image, ImageTk
 from matplotlib import colormaps
 
@@ -75,13 +76,9 @@ class Artwork:
         root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
-
-
-
-
+        root.bind("<space>", self.save_art)
         # debug util
-        self.canvas.bind("<Button-2>", self.debug_printout)
-
+        #self.canvas.bind("<Button-2>", self.debug_printout)
         self.canvas.pack()
         self.image = np2image(first_frame)
         self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
@@ -157,3 +154,13 @@ class Artwork:
         frame = self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer]
         self.image = np2image(frame)
         self.canvas.itemconfig(self.image_item, image=self.image)
+
+    def save_art(self, event):
+        imgpil = ImageTk.getimage(self.image)
+        n = 1
+        while os.path.exists("fractalination-%d.png" % n):
+            n += 1
+        savefile = "fractalination-%d.png" % n
+        print("Saving art to", savefile)
+        imgpil.save(savefile)
+        imgpil.close()
