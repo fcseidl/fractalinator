@@ -16,21 +16,43 @@ def np2image(arr):
 
 
 class Artwork:
+    """
+    An Artwork object creates and controls a fractal drawing widget.
+    The first two constructor arguments are the height and width of
+    the drawing window, in pixels. Note that large windows may exhibit
+    perceptible lag when drawing. Keyword arguments can be used to
+    control the brush, color, and noise settings. They include:
 
+    :param bailout_radius: Escape threshold for iterative fractal generation. Values near
+        or below 2 may allow the noise field to affect the background image. Default = 3.
+    :param brush_strength: Larger values give thicker strokes. Default = 75.
+    :param brush_radius: May need to be increased to avoid choppy images with
+        higher brush strength. Larger values slow drawing. Default = 100.
+    :param cmap_name: matplotlib colormap name to apply to use in image. Default = 'gray_r'.
+    :param cmap_period: Smaller values make the colormap repeat more frequently around the
+        outside of the fractal. Default = 8.
+    :param max_it: maximum iteration count for iterative fractal generation. Smaller
+        values speed computation but reduce image quality. Default = 30.
+    :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
+    :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.
+    :param power: Multibrot fractal order. Default is 3. Must be a positive integer.
+    :param thin_it: Only iterate pixels to max_it if they are not diverged by this iteration,
+        saving computation costs. Default = 5.
+    """
     def __init__(self, width, height, *,
+                 bailout_radius=3,
                  brush_strength=75,
                  brush_radius=100,
-                 power=3,
                  cmap_name='gray_r',
                  cmap_period=8,
-                 noise_sig=26,
+                 max_it=30,
                  noise_seed=None,
-                 bailout_radius=3,
-                 thin_it=5,
-                 iterations=40):
+                 noise_sig=26,
+                 power=3,
+                 thin_it=5):
         self.w, self.h, = width, height
         self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.n_it \
-            = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, iterations
+            = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, max_it
 
         # set up brush
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
@@ -53,56 +75,17 @@ class Artwork:
         root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
+
+
+
+
         # debug util
         self.canvas.bind("<Button-2>", self.debug_printout)
+
         self.canvas.pack()
-
-        # divide image into tiles for fast drawing
-        self.brush_width, _ = self.brush.shape
-        self.tiles, self.items = self.init_tiles()
-
+        self.image = np2image(first_frame)
+        self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
         root.mainloop()
-
-    def tile_idx(self, idx):
-        """Compute tile row/column from pixel u/v."""
-        return int(idx / self.brush_width)
-
-    def tile_rgb(self, i, j):
-        """Return pixel coordinates of nw corner and RGB values of (i, j) tile."""
-        l = i * self.brush_width
-        r = min(l + self.brush_width, self.h)
-        t = j * self.brush_width
-        b = min(t + self.brush_width, self.w)
-        return l, t, self.buffered_rgb[
-                        self.buffer + l:self.buffer + r,
-                        self.buffer + t:self.buffer + b]
-
-    def init_tiles(self):
-        """Initialize a grid of separately animated image tiles."""
-        tiles, items = [], []
-        wtiles = self.tile_idx(self.h) + 1
-        htiles = self.tile_idx(self.w) + 1
-        for i in range(wtiles):
-            row_tiles, row_items = [], []
-            for j in range(htiles):
-                l, t, ijframe = self.tile_rgb(i, j)
-                tile = np2image(ijframe)# * ((i + j) % 2))
-                row_tiles.append(tile)
-                row_items.append(
-                    self.canvas.create_image(t, l, anchor="nw", image=tile)
-                )
-            tiles.append(row_tiles)
-            items.append(row_items)
-        return tiles, items
-
-    def redraw_tile(self, u, v):
-        """Redraw the tile containing a pixel."""
-        i = self.tile_idx(u)
-        j = self.tile_idx(v)
-        _, _, rgb = self.tile_rgb(i, j)
-        tile = np2image(rgb)
-        self.tiles[i][j] = tile
-        self.canvas.itemconfig(self.items[i][j], image=tile)
 
     def t2rgb(self, t):
         """Maps from (smoothed) escape times to rgb space."""
@@ -160,24 +143,17 @@ class Artwork:
             return
 
         # update intensity
-        new_intensity = self.buffered_intensity[v:v + self.brush_width, u:u + self.brush_width]
+        new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
         new_intensity += self.brush
 
         # update z and don't exceed bailout radius
         new_z = np.sqrt(1 / (new_intensity + 1e-7))
         new_z = np.minimum(new_z, self.bailout_radius).astype(complex)
-        new_z *= self.buffered_unit[v:v + self.brush_width, u:u + self.brush_width]
+        new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
 
         # update colors in numpy
         new_rgb = self.z2rgb(new_z)
-        self.buffered_rgb[v:v + self.brush_width, u:u + self.brush_width] = new_rgb
-
-        # get pixel coordinates of brush corners
-        l = max(0, v - self.buffer)
-        r = min(self.h - 1, v + self.buffer + 1)
-        t = max(0, u - self.buffer)
-        b = min(self.w - 1, u + self.buffer + 1)
-
-        # redraw four tiles
-        for u, v in [(l, t), (l, b), (r, t), (r, b)]:
-            self.redraw_tile(u, v)
+        self.buffered_rgb[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
+        frame = self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer]
+        self.image = np2image(frame)
+        self.canvas.itemconfig(self.image_item, image=self.image)

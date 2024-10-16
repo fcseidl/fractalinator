@@ -14,9 +14,9 @@ class KBrot:
     k:
         degree of the iterated polynomial map, default is 2.
     maxiter:
-        number of iterations to test for divergence, default is 100.
+        number of max_it to test for divergence, default is 100.
     color_cycle:
-        a point whose orbit diverges after n iterations is colored by color_cycle[n % len(colorcycle)].
+        a point whose orbit diverges after n max_it is colored by color_cycle[n % len(colorcycle)].
         Default color cycle linearly interpolates between two pretty colors.
     julia_param:
         If this parameter is a point in the complex plane, then this object visualizes the Julia set
