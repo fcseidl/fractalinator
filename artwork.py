@@ -86,7 +86,7 @@ class Artwork:
             row_tiles, row_items = [], []
             for j in range(htiles):
                 l, t, ijframe = self.tile_rgb(i, j)
-                tile = np2image(ijframe * ((i + j) % 2))
+                tile = np2image(ijframe)# * ((i + j) % 2))
                 row_tiles.append(tile)
                 row_items.append(
                     self.canvas.create_image(t, l, anchor="nw", image=tile)
