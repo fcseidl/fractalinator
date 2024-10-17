@@ -2,4 +2,5 @@ venv
 .idea
 __*
 *.DS_Store
+fractalination-*
 
