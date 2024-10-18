@@ -42,17 +42,15 @@ def upsample(a, sf: int):
 class Artwork:
     """
     An Artwork object creates and controls a fractal drawing widget.
-    The first two constructor arguments are the height and width of
-    the drawing window, in pixels. Note that large windows may exhibit
-    perceptible lag when drawing. Keyword arguments can be used to
-    control the brush, color, and noise settings. They include:
+    Keyword arguments can be used to control the brush, color, and noise settings.
+    They include:
 
     :param bailout_radius: Escape threshold for iterative fractal generation. Values near
         or below 2 may allow the noise field to affect the background image. Default = 3.
     :param brush_strength: Larger values give thicker strokes. Default = 50.
     :param brush_radius: May need to be increased to avoid choppy images with
         higher brush strength. Larger values slow drawing. Default = 100.
-    :param cmap_name: matplotlib colormap name to apply to use in image. Default = 'gray_r'.
+    :param cmap_name: matplotlib colormap name to use in image. Default = 'gray_r'.
     :param cmap_period: Smaller values make the colormap repeat more frequently around the
         outside of the fractal. Default = 4.
     :param max_it: maximum iteration count for iterative fractal generation. Smaller
@@ -60,7 +58,8 @@ class Artwork:
     :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
     :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.
     :param power: Multibrot fractal order. Default is 3. Must be a positive integer.
-    :param shape: (width, height) of drawing window in pixels. Default = (720, 576).
+    :param shape: (width, height) of drawing window in pixels. Note that large windows may exhibit
+        perceptible lag when drawing. Default = (720, 576).
     :param thin_it: Only iterate pixels to max_it if they are not diverged by this iteration,
         saving computation costs. Default = 5.
     """
