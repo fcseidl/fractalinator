@@ -100,7 +100,7 @@ class Artwork:
 
         for it in range(min(self.n_it, self.thin_it)):
             azn = np.abs(zn)
-            escaped = (azn > self.bailout_radius) & (t < 0)
+            escaped = (azn > self.bailout_radius + 1e-6) & (t < 0)  # 1e-6 prevents dots w small bailout rad
             t[escaped] = it + np.exp(1 - azn[escaped] / self.bailout_radius)
             zn[t >= 0] = 0     # prevent overflow warning
             zn = zn ** self.power + z0
@@ -111,7 +111,7 @@ class Artwork:
 
         for it in range(self.thin_it, self.n_it):
             azn = np.abs(zn)
-            escaped = (azn > self.bailout_radius) & (t_ < 0)
+            escaped = (azn > self.bailout_radius + 1e-6) & (t_ < 0)
             t_[escaped] = it + np.exp(self.bailout_radius - azn[escaped])
             zn[t_ >= 0] = 0     # prevent overflow warning
             if it < self.n_it - 1:
