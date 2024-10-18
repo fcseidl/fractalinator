@@ -54,7 +54,7 @@ class Artwork:
         higher brush strength. Larger values slow drawing. Default = 100.
     :param cmap_name: matplotlib colormap name to apply to use in image. Default = 'gray_r'.
     :param cmap_period: Smaller values make the colormap repeat more frequently around the
-        outside of the fractal. Default = 8.
+        outside of the fractal. Default = 4.
     :param max_it: maximum iteration count for iterative fractal generation. Smaller
         values speed computation but reduce image quality. Default = 30.
     :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
