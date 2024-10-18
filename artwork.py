@@ -16,6 +16,29 @@ def np2image(arr):
                 np.uint8)))
 
 
+def upsample(a, sf: int):
+    """
+    Smoothly upsample a 2D array by an integer scale factor using
+    bilinear interpolation.
+    """
+    u, v = a.shape
+    b = np.zeros((u + 1, v + 1), dtype=a.dtype)
+    b[:u, :v] = a
+    b00, b01, b10, b11 = b[:-1, :-1], b[:-1, 1:], b[1:, :-1], b[1:, 1:]
+    u, v = sf * np.array(a.shape)
+    result = np.zeros((u, v), dtype=a.dtype)
+    for i in range(sf):
+        for j in range(sf):
+            x, y = i / sf, j / sf
+            w00 = (1 - x) * (1 - y)
+            w01 = (1 - x) * y
+            w10 = x * (1 - y)
+            w11 = x * y
+            interp = w00 * b00 + w01 * b01 + w10 * b10 + w11 * b11
+            result[i:u:sf, j:v:sf] = interp
+    return result[:1 - sf, :1 - sf]
+
+
 class Artwork:
     """
     An Artwork object creates and controls a fractal drawing widget.
@@ -76,12 +99,23 @@ class Artwork:
         root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
-        root.bind("<space>", self.save_art)
         # debug util
         #self.canvas.bind("<Button-2>", self.debug_printout)
         self.canvas.pack()
         self.image = np2image(first_frame)
         self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
+
+        # tkinter set up to save art at user-input resolution
+        root.bind('1', lambda event: self.save_art(1))
+        root.bind('2', lambda event: self.save_art(2))
+        root.bind('3', lambda event: self.save_art(3))
+        root.bind('4', lambda event: self.save_art(4))
+        root.bind('5', lambda event: self.save_art(5))
+        root.bind('6', lambda event: self.save_art(6))
+        root.bind('7', lambda event: self.save_art(7))
+        root.bind('8', lambda event: self.save_art(8))
+        root.bind('9', lambda event: self.save_art(9))
+
         root.mainloop()
 
     def t2rgb(self, t):
@@ -92,6 +126,12 @@ class Artwork:
         reverse = (i % 2) == 1
         s[reverse] = 1. - s[reverse]
         return 255 * self.mpl_cmap(s)[:, :, :3]
+
+    def i2m(self, i):
+        """Map paint intensity to modulus."""
+        m = np.sqrt((1 / (i + 1e-7)))
+        m = np.minimum(m, self.bailout_radius)
+        return m
 
     def z2rgb(self, z0):
         """Map values in the complex plane to fractal image colors."""
@@ -124,6 +164,7 @@ class Artwork:
         return result
 
     def debug_printout(self, event):
+        """Utility function for debugging; not used in typical execution."""
         u, v = event.x, event.y
         print("coordinates: (%d, %d)" % (u, v))
         i = self.buffered_intensity[self.buffer + v, self.buffer + u]
@@ -133,6 +174,7 @@ class Artwork:
         print()
 
     def paint_stroke(self, event):
+        """Respond to a B1-motion event by updating buffered fields and display window."""
         u, v = event.x, event.y
 
         # check boundaries
@@ -144,8 +186,7 @@ class Artwork:
         new_intensity += self.brush
 
         # update z and don't exceed bailout radius
-        new_z = np.sqrt(1 / (new_intensity + 1e-7))
-        new_z = np.minimum(new_z, self.bailout_radius).astype(complex)
+        new_z = self.i2m(new_intensity).astype(complex)
         new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
 
         # update colors in numpy
@@ -155,12 +196,23 @@ class Artwork:
         self.image = np2image(frame)
         self.canvas.itemconfig(self.image_item, image=self.image)
 
-    def save_art(self, event):
-        imgpil = ImageTk.getimage(self.image)
+    def save_art(self, sf: int):
+        """Save a png image of the current frame with resolution increased sf times."""
         n = 1
         while os.path.exists("fractalination-%d.png" % n):
             n += 1
         savefile = "fractalination-%d.png" % n
-        print("Saving art to", savefile)
+        print("Saving current image to %s with resolution increased %d times..."
+              % (savefile, sf))
+
+        intensity = self.buffered_intensity[self.buffer:-self.buffer, self.buffer:-self.buffer]
+        modulus = self.i2m(intensity)
+        unit = self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer]
+        z = unit * modulus
+        zz = upsample(z, sf)
+        rgb = self.z2rgb(zz)
+
+        image = np2image(rgb)
+        imgpil = ImageTk.getimage(image)
         imgpil.save(savefile)
         imgpil.close()
