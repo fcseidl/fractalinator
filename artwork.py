@@ -49,7 +49,7 @@ class Artwork:
 
     :param bailout_radius: Escape threshold for iterative fractal generation. Values near
         or below 2 may allow the noise field to affect the background image. Default = 3.
-    :param brush_strength: Larger values give thicker strokes. Default = 75.
+    :param brush_strength: Larger values give thicker strokes. Default = 50.
     :param brush_radius: May need to be increased to avoid choppy images with
         higher brush strength. Larger values slow drawing. Default = 100.
     :param cmap_name: matplotlib colormap name to apply to use in image. Default = 'gray_r'.
@@ -60,22 +60,24 @@ class Artwork:
     :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
     :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.
     :param power: Multibrot fractal order. Default is 3. Must be a positive integer.
+    :param shape: (width, height) of drawing window in pixels. Default = (720, 576).
     :param thin_it: Only iterate pixels to max_it if they are not diverged by this iteration,
         saving computation costs. Default = 5.
     """
-    def __init__(self, width, height, *,
+    def __init__(self, *,
                  bailout_radius=3,
-                 brush_strength=75,
+                 brush_strength=50,
                  brush_radius=100,
                  cmap_name='gray_r',
-                 cmap_period=8,
+                 cmap_period=4,
                  max_it=30,
                  noise_seed=None,
                  noise_sig=26,
                  power=3,
+                 shape=(720, 576),
                  thin_it=5):
-        self.w, self.h, = width, height
-        self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.n_it \
+        self.w, self.h, = shape
+        self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.max_it \
             = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, max_it
 
         # set up brush
@@ -86,10 +88,10 @@ class Artwork:
 
         # create buffered layers in numpy
         unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
-        buffered_shape = (2 * brush_radius + height, 2 * brush_radius + width)
+        buffered_shape = (2 * brush_radius + self.h, 2 * brush_radius + self.w)
         self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer] = unit
-        self.buffered_intensity = np.zeros((2 * brush_radius + height, 2 * brush_radius + width))
+        self.buffered_intensity = np.zeros((2 * brush_radius + self.h, 2 * brush_radius + self.w))
         self.buffered_rgb = np.zeros(buffered_shape + (3,))
         first_frame = self.z2rgb(self.bailout_radius * unit)
         self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
@@ -99,8 +101,7 @@ class Artwork:
         root.title("Draw Something!")
         self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
         self.canvas.bind("<B1-Motion>", self.paint_stroke)
-        # debug util
-        #self.canvas.bind("<Button-2>", self.debug_printout)
+        #self.canvas.bind("<Button-2>", self.debug_printout)   # debug only
         self.canvas.pack()
         self.image = np2image(first_frame)
         self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
@@ -133,12 +134,15 @@ class Artwork:
         m = np.minimum(m, self.bailout_radius)
         return m
 
-    def z2rgb(self, z0):
+    def z2rgb(self, z0, max_it=None):
         """Map values in the complex plane to fractal image colors."""
-        zn = z0
-        t = -1 * np.ones(z0.shape)          # smooth escape time
+        if max_it is None:
+            max_it = self.max_it
 
-        for it in range(min(self.n_it, self.thin_it)):
+        zn = z0
+        t = -1 * np.ones(z0.shape)          # will contain smooth escape time
+
+        for it in range(min(max_it, self.thin_it)):
             azn = np.abs(zn)
             escaped = (azn > self.bailout_radius + 1e-6) & (t < 0)  # 1e-6 prevents dots w small bailout rad
             t[escaped] = it + np.exp(1 - azn[escaped] / self.bailout_radius)
@@ -149,12 +153,12 @@ class Artwork:
         ind = (t < 0) * (azn <= self.bailout_radius)  # not yet escaped
         zn, z0, t_, = zn[ind], z0[ind], t[ind]
 
-        for it in range(self.thin_it, self.n_it):
+        for it in range(self.thin_it, max_it):
             azn = np.abs(zn)
             escaped = (azn > self.bailout_radius + 1e-6) & (t_ < 0)
             t_[escaped] = it + np.exp(self.bailout_radius - azn[escaped])
             zn[t_ >= 0] = 0     # prevent overflow warning
-            if it < self.n_it - 1:
+            if it < self.max_it - 1:
                 zn = zn ** self.power + z0
 
         t[ind] = t_
@@ -212,7 +216,7 @@ class Artwork:
             unit = self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer]
             z = unit * modulus
             zz = upsample(z, sf)
-            rgb = self.z2rgb(zz)
+            rgb = self.z2rgb(zz, max_it=80)     # crisper image
             image = np2image(rgb)
 
         imgpil = ImageTk.getimage(image)
