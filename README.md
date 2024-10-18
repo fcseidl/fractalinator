@@ -1,7 +1,7 @@
 # Fractalinator
 
-This is an drawing app which lets you draw a multibrot-like fractal in any shape that you choose! For instance, I drew the image below in a pop-up 
-window opened by the following simple program. I tried to evoke a saguaro cactus.
+This is an drawing app which lets you draw a multibrot-like fractal in any shape that you choose! For instance, I drew the first image below in a pop-up 
+window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
 ```
 from artwork import Artwork
 Artwork(cmap_name='viridis_r')
