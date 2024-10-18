@@ -204,15 +204,17 @@ class Artwork:
         savefile = "fractalination-%d.png" % n
         print("Saving current image to %s with resolution increased %d times..."
               % (savefile, sf))
+        if sf == 1:
+            image = self.image
+        else:
+            intensity = self.buffered_intensity[self.buffer:-self.buffer, self.buffer:-self.buffer]
+            modulus = self.i2m(intensity)
+            unit = self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer]
+            z = unit * modulus
+            zz = upsample(z, sf)
+            rgb = self.z2rgb(zz)
+            image = np2image(rgb)
 
-        intensity = self.buffered_intensity[self.buffer:-self.buffer, self.buffer:-self.buffer]
-        modulus = self.i2m(intensity)
-        unit = self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer]
-        z = unit * modulus
-        zz = upsample(z, sf)
-        rgb = self.z2rgb(zz)
-
-        image = np2image(rgb)
         imgpil = ImageTk.getimage(image)
         imgpil.save(savefile)
         imgpil.close()
