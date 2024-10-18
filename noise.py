@@ -1,4 +1,4 @@
-from numpy.fft import rfftn, irfftn, fft2, ifft2
+from numpy.fft import rfftn, irfftn
 import numpy as np
 
 
