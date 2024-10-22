@@ -46,17 +46,17 @@ class Artwork:
     They include:
 
     :param bailout_radius: Escape threshold for iterative fractal generation. Values near
-        or below 2 may allow the noise field to affect the background image. Default = 3.
-    :param brush_strength: Larger values give thicker strokes. Default = 50.
+        or below 2 may allow the noise field to affect the background image. Default = 3.00.
+    :param brush_strength: Larger values give thicker strokes. Default = 50.0.
     :param brush_radius: May need to be increased to avoid choppy images with
         higher brush strength. Larger values slow drawing. Default = 100.
     :param cmap_name: matplotlib colormap name to use in image. Default = 'gray_r'.
     :param cmap_period: Smaller values make the colormap repeat more frequently around the
-        outside of the fractal. Default = 4.
+        outside of the fractal. Default = 4.0.
     :param max_it: maximum iteration count for iterative fractal generation. Smaller
         values speed computation but reduce image quality. Default = 30.
     :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
-    :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.
+    :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.0.
     :param power: Multibrot fractal order. Default is 3. Must be a positive integer.
     :param shape: (width, height) of drawing window in pixels. Note that large windows may exhibit
         perceptible lag when drawing. Default = (720, 576).
@@ -64,14 +64,14 @@ class Artwork:
         saving computation costs. Default = 5.
     """
     def __init__(self, *,
-                 bailout_radius=3,
-                 brush_strength=50,
+                 bailout_radius=3.0,
+                 brush_strength=50.0,
                  brush_radius=100,
                  cmap_name='gray_r',
-                 cmap_period=4,
+                 cmap_period=4.0,
                  max_it=30,
                  noise_seed=None,
-                 noise_sig=26,
+                 noise_sig=26.0,
                  power=3,
                  shape=(720, 576),
                  thin_it=5):
