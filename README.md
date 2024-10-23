@@ -25,8 +25,7 @@ To make Fractalinator easy to play with, it has few dependencies. The ```pip``` 
 ## Usage
 Fractalinator drawing windows are managed by the ```Artwork``` class. To make a fractalination, simply construct an ```Artwork``` object. 
 Calling ```Artwork()``` will open a drawing window with the default settings. To save your drawing, press the 1 key while in the drawing window. 
-Your art will be saved to a file named ```fractalination-[n].png```. Other number keys (2-9) behave similarly, but save a more detailed image with the resolution 
-increased multiplied by the number on the key.
+Your art will be saved to a file named ```fractalination-[n].png```. Other number keys (2-9) behave similarly, but save a more detailed image with the resolution multiplied by the number on the key.
 
 The default settings can be changed with a number of keyword arguments. Mostly notably, the ```cmap_name``` argument allows you to choose any [matplotlib colormap](https://matplotlib.org/stable/gallery/color/colormap_reference.html). The full set of keyword arguments is described below.
 | **Name** | **Default** | **Description** |
