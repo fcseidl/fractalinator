@@ -6,7 +6,7 @@ window opened by the following simple program. I tried to evoke a saguaro cactus
 from artwork import Artwork
 Artwork(cmap_name='viridis_r')
 ```
-![fractalinator](cactus.png)
+![fractalinator](gallery/cactus.png)
 
 ## Dependencies
 To make Fractalinator easy to play with, it has few dependencies. If you use Python, ```tkinter``` is probably installed by default.
@@ -18,7 +18,7 @@ To make Fractalinator easy to play with, it has few dependencies. If you use Pyt
 
 ## Usage
 Fractalinator drawing windows are managed by the ```Artwork``` class in the ```artwork``` module. To make a fractalination, simply construct an ```Artwork``` object. 
-Simply calling ```Artwork()``` will open a drawing window with the default settings. To save your drawing, press the 1 key while in the drawing window. 
+Calling ```Artwork()``` will open a drawing window with the default settings. To save your drawing, press the 1 key while in the drawing window. 
 Your art will be saved to a file named ```fractalination-[n].png```. Other number keys (2-9) behave similarly, but save a more detailed image with the resolution 
 increased multiplied by the number on the key.
 
@@ -43,14 +43,14 @@ Yes, yes it is.
 ## Lagoon
 The waves are achieved by setting ```bailout_radius=2```.
 
-![fractalinator](lagoon.png)
+![fractalinator](gallery/lagoon.png)
 
 ## Flames
 Here, I drew in the negative space rather than the positive.
 
-![fractalinator](flames.png)
+![fractalinator](gallery/flames.png)
 
 ## Ghost
 Happy October.
 
-![fractalinator](ghost.png)
+![fractalinator](gallery/ghost.png)
