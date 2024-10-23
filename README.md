@@ -1,15 +1,21 @@
 # Fractalinator
 
-This is an drawing app which lets you draw a multibrot-like fractal in any shape that you choose! For instance, I drew the first image below in a pop-up 
-window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
+This is an drawing app which lets you draw a [multibrot](https://en.wikipedia.org/wiki/Multibrot_set)-like fractal in any shape that you choose! For instance, I drew the first image below in a pop-up window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
 ```
-from artwork import Artwork
+from fractalinator import Artwork
 Artwork(cmap_name='viridis_r')
 ```
 ![fractalinator](gallery/cactus.png)
 
+## Installation
+Install ```fractalinator``` by running the command 
+```
+pip install git+https://github.com/fcseidl/fractalinator/
+```
+or by cloning this repo.
+
 ## Dependencies
-To make Fractalinator easy to play with, it has few dependencies. If you use Python, ```tkinter``` is probably installed by default.
+To make Fractalinator easy to play with, it has few dependencies. The ```pip``` command above installs ```numpy``` and ```matplotlib``` automatically, if they are not installed already. ```tkinter``` is usually installed by default with Python.
 | Library    | Tested Version |
 | -------- | ------- |
 | numpy  | 2.1.0    |
@@ -17,7 +23,7 @@ To make Fractalinator easy to play with, it has few dependencies. If you use Pyt
 | tkinter | 8.6 |
 
 ## Usage
-Fractalinator drawing windows are managed by the ```Artwork``` class in the ```artwork``` module. To make a fractalination, simply construct an ```Artwork``` object. 
+Fractalinator drawing windows are managed by the ```Artwork``` class. To make a fractalination, simply construct an ```Artwork``` object. 
 Calling ```Artwork()``` will open a drawing window with the default settings. To save your drawing, press the 1 key while in the drawing window. 
 Your art will be saved to a file named ```fractalination-[n].png```. Other number keys (2-9) behave similarly, but save a more detailed image with the resolution 
 increased multiplied by the number on the key.
