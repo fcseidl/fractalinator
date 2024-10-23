@@ -31,14 +31,14 @@ increased multiplied by the number on the key.
 The default settings can be changed with a number of keyword arguments. Mostly notably, the ```cmap_name``` argument allows you to choose any [matplotlib colormap](https://matplotlib.org/stable/gallery/color/colormap_reference.html). The full set of keyword arguments is described below.
 | **Name** | **Default** | **Description** |
 | -------- | ----------- | --------------- |
-| ```bailout_radius``` | ```3``` | Escape threshold for iterative fractal generation. Values near or below 2 may allow the noise field to affect the background image. |
-| ```brush_strength``` | ```50``` | Larger values give thicker strokes. |
+| ```bailout_radius``` | ```3.0``` | Escape threshold for iterative fractal generation. Values near or below 2 may allow the noise field to affect the background image. |
+| ```brush_strength``` | ```50.0``` | Larger values give thicker strokes. |
 | ```brush_radius``` | ```100``` | May need to be increased to avoid choppy images with higher brush strength. Larger values slow drawing. |
 | ```cmap_name``` | 'gray_r' | ```matplotlib``` colormap name to use in image. |
-| ```cmap_period``` | ```4``` | Smaller values make the colormap repeat more frequently around the outside of the fractal.|
+| ```cmap_period``` | ```4.0``` | Smaller values make the colormap repeat more frequently around the outside of the fractal.|
 | ```max_it``` | ```30``` | Maximum iteration count for iterative fractal generation. Smaller values speed computation but reduce image quality. |
 | ```noise_seed``` | ```None``` | If positive integer, random seed for reproducible noise. |
-| ```noise_sig``` | ```26``` | Smaller values result in more, smaller features in the image. |
+| ```noise_sig``` | ```26.0``` | Smaller values result in more, smaller features in the image. |
 | ```power``` | ```3``` | Multibrot fractal order. Must be a positive integer. |
 | ```shape``` | ```(720, 576)``` | (width, height) of drawing window in pixels. Note that large windows may exhibit perceptible lag when drawing. |
 | ```thin_it``` | ```5``` | Only iterate pixels to max_it if they are not diverged by this iteration, saving computation costs. |
