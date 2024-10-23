@@ -1,7 +1,7 @@
 
 from ast import literal_eval
 from sys import argv
-from artwork import Artwork
+from .artwork import Artwork
 
 
 if __name__ == "__main__":

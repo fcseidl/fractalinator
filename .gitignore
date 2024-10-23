@@ -4,3 +4,10 @@ __*
 *.DS_Store
 fractalination-*
 
+# needed for package distribution
+*.pyc
+/dist/
+/*.egg-info
+/*.egg
+build/
+

@@ -5,7 +5,7 @@ import os
 from PIL import Image, ImageTk
 from matplotlib import colormaps
 
-from noise import unit_noise, d2fromcenter
+from .noise import unit_noise, d2fromcenter
 
 
 def np2image(arr):
