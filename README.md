@@ -3,10 +3,10 @@
 This is an drawing app which lets you draw a multibrot-like fractal in any shape that you choose! For instance, I drew the first image below in a pop-up 
 window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
 ```
-from artwork import Artwork
+from fractalinator import Artwork
 Artwork(cmap_name='viridis_r')
 ```
-![fractalinator](cactus.png)
+![fractalinator](gallery/cactus.png)
 
 ## Dependencies
 To make Fractalinator easy to play with, it has few dependencies. If you use Python, ```tkinter``` is probably installed by default.
@@ -43,14 +43,14 @@ Yes, yes it is.
 ## Lagoon
 The waves are achieved by setting ```bailout_radius=2```.
 
-![fractalinator](lagoon.png)
+![fractalinator](gallery/lagoon.png)
 
 ## Flames
 Here, I drew in the negative space rather than the positive.
 
-![fractalinator](flames.png)
+![fractalinator](gallery/flames.png)
 
 ## Ghost
 Happy October.
 
-![fractalinator](ghost.png)
+![fractalinator](gallery/ghost.png)
