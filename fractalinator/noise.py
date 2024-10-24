@@ -8,7 +8,11 @@ def d2fromcenter(shape, resolution=1):
     distance from the center index, if the number of grid cells per unit is given
     by the resolution.
     """
-    grid = np.ogrid[*(slice(0, s) for s in shape), ]
+    # latest syntax is clean for any dimension
+    # grid = np.ogrid[*(slice(0, s) for s in shape), ]
+    # TODO: 3.8 doesn't like the above so we assume 2d
+    s1, s2 = shape
+    grid = np.ogrid[0:s1, 0:s2]
     return sum(((g - s/2 + 0.5) / resolution)**2 for g, s in zip(grid, shape))
 
 
