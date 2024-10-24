@@ -221,3 +221,4 @@ class Artwork:
         imgpil = ImageTk.getimage(image)
         imgpil.save(savefile)
         imgpil.close()
+
