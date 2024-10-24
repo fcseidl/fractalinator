@@ -105,7 +105,9 @@ def noise(
     # create noise map
     white = np.random.randn(*pad_shape)
     smooth = convolve(white, kernel)
-    return smooth[*(slice(0, sj) for sj in shape), ]
+    # TODO: again old pythons don't like the elegant line below
+    # return smooth[*(slice(0, sj) for sj in shape), ]
+    return smooth[:shape[0], :shape[1]]
 
 
 def unit_noise(**kwargs) -> np.ndarray:
