@@ -7,7 +7,8 @@ Artwork(cmap_name='viridis_r')
 ```
 
 
-https://github.com/user-attachments/assets/a884bca8-5221-4da7-8b6b-c685906f164f
+https://github.com/user-attachments/assets/bca13855-29b0-4c92-9ce6-bf94ea0d238d
+
 
 
 
