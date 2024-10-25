@@ -5,7 +5,11 @@ This is an drawing app which lets you draw a [multibrot](https://en.wikipedia.or
 from fractalinator import Artwork
 Artwork(cmap_name='viridis_r')
 ```
-![fractalinator](gallery/drawingcactus.mov)
+
+
+https://github.com/user-attachments/assets/a884bca8-5221-4da7-8b6b-c685906f164f
+
+
 
 ## Installation
 Install ```fractalinator``` by running the command 
