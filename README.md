@@ -1,11 +1,16 @@
 # Fractalinator
 
-This is an drawing app which lets you draw a [multibrot](https://en.wikipedia.org/wiki/Multibrot_set)-like fractal in any shape that you choose! For instance, I drew the first image below in a pop-up window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
+This is an drawing app which lets you draw a [multibrot](https://en.wikipedia.org/wiki/Multibrot_set)-like fractal in any shape that you choose! For instance, the video below shows me drawing in a pop-up window opened by the following simple program. I tried to evoke a saguaro cactus. A few more example fractalinations are at the bottom of this README.
 ```
 from fractalinator import Artwork
 Artwork(cmap_name='viridis_r')
 ```
-![fractalinator](gallery/cactus.png)
+
+
+https://github.com/user-attachments/assets/bca13855-29b0-4c92-9ce6-bf94ea0d238d
+
+
+
 
 ## Installation
 Install ```fractalinator``` by running the command 
@@ -59,3 +64,8 @@ Here, I drew in the negative space rather than the positive.
 Happy October.
 
 ![fractalinator](gallery/ghost.png)
+
+## Saguaro
+Here's the cactus drawing from the video, in higher resolution.
+
+![fractalinator](gallery/cactus.png)
