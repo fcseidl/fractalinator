@@ -1,49 +1,14 @@
 
-import tkinter as tk
 import numpy as np
-import os
-from PIL import Image, ImageTk
 from matplotlib import colormaps
 
-from .noise import unit_noise, d2fromcenter
-
-
-def np2image(arr):
-    """Convert a numpy array into an image which can go on a tkinter canvas."""
-    return ImageTk.PhotoImage(
-        image=Image.fromarray(
-            arr.astype(
-                np.uint8)))
-
-
-def upsample(a, sf: int):
-    """
-    Smoothly upsample a 2D array by an integer scale factor using
-    bilinear interpolation.
-    """
-    u, v = a.shape
-    b = np.zeros((u + 1, v + 1), dtype=a.dtype)
-    b[:u, :v] = a
-    b00, b01, b10, b11 = b[:-1, :-1], b[:-1, 1:], b[1:, :-1], b[1:, 1:]
-    u, v = sf * np.array(a.shape)
-    result = np.zeros((u, v), dtype=a.dtype)
-    for i in range(sf):
-        for j in range(sf):
-            x, y = i / sf, j / sf
-            w00 = (1 - x) * (1 - y)
-            w01 = (1 - x) * y
-            w10 = x * (1 - y)
-            w11 = x * y
-            interp = w00 * b00 + w01 * b01 + w10 * b10 + w11 * b11
-            result[i:u:sf, j:v:sf] = interp
-    return result[:1 - sf, :1 - sf]
+from fractalinator.util import unit_noise, d2fromcenter
 
 
 class Artwork:
     """
-    An Artwork object creates and controls a fractal drawing widget.
-    Keyword arguments can be used to control the brush, color, and noise settings.
-    They include:
+    An Artwork object maintains the raw image layers of a fractalination.
+    Keyword arguments include:
 
     :param bailout_radius: Escape threshold for iterative fractal generation. Values near
         or below 2 may allow the noise field to affect the background image. Default = 3.00.
@@ -86,37 +51,20 @@ class Artwork:
         self.brush[d2 > d2max] = 0
 
         # create buffered layers in numpy
-        unit = unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
         buffered_shape = (2 * brush_radius + self.h, 2 * brush_radius + self.w)
         self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
-        self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer] = unit
-        self.buffered_intensity = np.zeros((2 * brush_radius + self.h, 2 * brush_radius + self.w))
-        self.buffered_rgb = np.zeros(buffered_shape + (3,))
-        first_frame = self.z2rgb(self.bailout_radius * unit)
-        self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer] = first_frame
+        self.buffered_intensity = np.zeros(buffered_shape)
+        self.buffered_rgb = np.zeros(buffered_shape + (3,), dtype=np.uint8)
 
-        # tkinter set up to display and update artwork
-        root = tk.Tk()
-        root.title("Draw Something!")
-        self.canvas = tk.Canvas(root, width=self.w, height=self.h)  # transposed from numpy
-        self.canvas.bind("<B1-Motion>", self.paint_stroke)
-        #self.canvas.bind("<Button-2>", self.debug_printout)   # debug only
-        self.canvas.pack()
-        self.image = np2image(first_frame)
-        self.image_item = self.canvas.create_image(0, 0, anchor="nw", image=self.image)
+        # unbuffered layers
+        sl = 2 * (slice(self.buffer, -self.buffer),)
+        self.unit = self.buffered_unit[sl]
+        self.intensity = self.buffered_intensity[sl]
+        self.rgb = self.buffered_rgb[sl]
 
-        # tkinter set up to save art at user-input resolution
-        root.bind('1', lambda event: self.save_art(1))
-        root.bind('2', lambda event: self.save_art(2))
-        root.bind('3', lambda event: self.save_art(3))
-        root.bind('4', lambda event: self.save_art(4))
-        root.bind('5', lambda event: self.save_art(5))
-        root.bind('6', lambda event: self.save_art(6))
-        root.bind('7', lambda event: self.save_art(7))
-        root.bind('8', lambda event: self.save_art(8))
-        root.bind('9', lambda event: self.save_art(9))
-
-        root.mainloop()
+        # initialize layers
+        self.unit += unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
+        self.rgb += self.z2rgb(self.bailout_radius * self.unit)
 
     def t2rgb(self, t):
         """Maps from (smoothed) escape times to rgb space."""
@@ -125,7 +73,7 @@ class Artwork:
         i = (t / self.period).astype(int)   # how many cycles
         reverse = (i % 2) == 1
         s[reverse] = 1. - s[reverse]
-        return 255 * self.mpl_cmap(s)[:, :, :3]
+        return (255 * self.mpl_cmap(s)[:, :, :3]).astype(np.uint8)
 
     def i2m(self, i):
         """Map paint intensity to modulus."""
@@ -166,59 +114,18 @@ class Artwork:
         result[interior] = 0
         return result
 
-    def debug_printout(self, event):
-        """Utility function for debugging; not used in typical execution."""
-        u, v = event.x, event.y
-        print("coordinates: (%d, %d)" % (u, v))
-        i = self.buffered_intensity[self.buffer + v, self.buffer + u]
-        print("intensity:", i)
-        print("modulus:", np.sqrt(1 / (i + 0.000001)))
-        print("direction:", self.buffered_unit[self.buffer + v, self.buffer + u])
-        print()
-
-    def paint_stroke(self, event):
-        """Respond to a B1-motion event by updating buffered fields and display window."""
-        u, v = event.x, event.y
-
+    def paint_stroke(self, u, v):
+        """Paint at a location."""
         # check boundaries
         if u < 0 or v < 0 or u >= self.w or v >= self.h:
             return
 
         # update intensity
-        new_intensity = self.buffered_intensity[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
+        sl = (slice(v, v + 2 * self.buffer + 1), slice(u, u + 2 * self.buffer + 1))
+        new_intensity = self.buffered_intensity[sl]
         new_intensity += self.brush
 
-        # update z and don't exceed bailout radius
-        new_z = self.i2m(new_intensity).astype(complex)
-        new_z *= self.buffered_unit[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1]
-
-        # update colors in numpy
-        new_rgb = self.z2rgb(new_z)
-        self.buffered_rgb[v:v + 2 * self.buffer + 1, u:u + 2 * self.buffer + 1] = new_rgb
-        frame = self.buffered_rgb[self.buffer:-self.buffer, self.buffer:-self.buffer]
-        self.image = np2image(frame)
-        self.canvas.itemconfig(self.image_item, image=self.image)
-
-    def save_art(self, sf: int):
-        """Save a png image of the current frame with resolution increased sf times."""
-        n = 1
-        while os.path.exists("fractalination-%d.png" % n):
-            n += 1
-        savefile = "fractalination-%d.png" % n
-        print("Saving current image to %s with resolution increased %d times..."
-              % (savefile, sf))
-        if sf == 1:
-            image = self.image
-        else:
-            intensity = self.buffered_intensity[self.buffer:-self.buffer, self.buffer:-self.buffer]
-            modulus = self.i2m(intensity)
-            unit = self.buffered_unit[self.buffer:-self.buffer, self.buffer:-self.buffer]
-            z = unit * modulus
-            zz = upsample(z, sf)
-            rgb = self.z2rgb(zz, max_it=80)     # crisper image
-            image = np2image(rgb)
-
-        imgpil = ImageTk.getimage(image)
-        imgpil.save(savefile)
-        imgpil.close()
+        # update rgb
+        new_z = self.i2m(new_intensity).astype(complex) * self.buffered_unit[sl]
+        self.buffered_rgb[sl] = self.z2rgb(new_z)
 

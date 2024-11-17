@@ -2,6 +2,29 @@ from numpy.fft import rfftn, irfftn
 import numpy as np
 
 
+def upsample(a, sf: int):
+    """
+    Smoothly upsample a 2D array by an integer scale factor using
+    bilinear interpolation.
+    """
+    u, v = a.shape
+    b = np.zeros((u + 1, v + 1), dtype=a.dtype)
+    b[:u, :v] = a
+    b00, b01, b10, b11 = b[:-1, :-1], b[:-1, 1:], b[1:, :-1], b[1:, 1:]
+    u, v = sf * np.array(a.shape)
+    result = np.zeros((u, v), dtype=a.dtype)
+    for i in range(sf):
+        for j in range(sf):
+            x, y = i / sf, j / sf
+            w00 = (1 - x) * (1 - y)
+            w01 = (1 - x) * y
+            w10 = x * (1 - y)
+            w11 = x * y
+            interp = w00 * b00 + w01 * b01 + w10 * b10 + w11 * b11
+            result[i:u:sf, j:v:sf] = interp
+    return result[:1 - sf, :1 - sf]
+
+
 def d2fromcenter(shape, resolution=1):
     """
     Create an array of the requested shape where each index holds its squared
@@ -105,9 +128,9 @@ def noise(
     # create noise map
     white = np.random.randn(*pad_shape)
     smooth = convolve(white, kernel)
-    # TODO: again old pythons don't like the elegant line below
-    # return smooth[*(slice(0, sj) for sj in shape), ]
     return smooth[:shape[0], :shape[1]]
+    # old pythons don't like the elegant line below
+    # return smooth[*(slice(0, sj) for sj in shape), ]
 
 
 def unit_noise(**kwargs) -> np.ndarray:
