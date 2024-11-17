@@ -3,8 +3,8 @@ import os
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from fractalinator.artwork import Artwork
-from fractalinator.util import upsample
+from .artwork import Artwork
+from .util import upsample
 
 
 def np2image(arr):

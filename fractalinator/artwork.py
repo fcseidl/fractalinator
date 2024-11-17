@@ -2,7 +2,7 @@
 import numpy as np
 from matplotlib import colormaps
 
-from fractalinator.util import unit_noise, d2fromcenter
+from .util import unit_noise, d2fromcenter
 
 
 class Artwork:

@@ -2,6 +2,18 @@ from numpy.fft import rfftn, irfftn
 import numpy as np
 
 
+def createUint8ClampedArray(rgb):
+    """
+    Turn an (h, w, 3)-shaped rgb image of uint8s into a
+    4hw-byte rgba data array with full opacity.
+    """
+    h, w, _ = rgb.shape
+    rgba = np.concat((
+        rgb, np.ones((h, w), dtype=np.uint8)
+    ))
+    return rgba.tobytes()
+
+
 def upsample(a, sf: int):
     """
     Smoothly upsample a 2D array by an integer scale factor using
@@ -146,24 +158,3 @@ def unit_noise(**kwargs) -> np.ndarray:
     z = real + 1j * imag
     z /= np.abs(z)
     return z
-
-
-def main():
-    import matplotlib.pyplot as plt
-
-    n = noise(
-        shape=(100, 100),
-        resolution=10,
-        rbf_sigma=10,
-        rbf_nsig=2.,
-        periodic=False
-    )
-
-    n = np.roll(n, (100, 100), (0, 1))
-    plt.imshow(n)
-    plt.colorbar()
-    plt.show()
-
-
-if __name__ == "__main__":
-    main()
