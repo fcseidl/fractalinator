@@ -1,4 +1,4 @@
-from numpy.fft import rfftn, irfftn
+from numpy.fft import fft2, ifft2
 import numpy as np
 
 
@@ -56,9 +56,9 @@ def convolve(x, y):
     # determine large enough shape
     s = np.maximum(x.shape, y.shape)
     ax = np.arange(s.shape[0])
-    fx = rfftn(x, s=s, axes=ax)
-    fy = rfftn(y, s=s, axes=ax)
-    return irfftn(fx * fy)
+    fx = fft2(x, s=s, axes=ax)
+    fy = fft2(y, s=s, axes=ax)
+    return ifft2(fx * fy)
 
 
 def cone_filter(radius, resolution, dimension) -> np.ndarray:
