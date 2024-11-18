@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+    <title>Draw Something!</title>
+    <style>/*
+      body {
+          margin: 0; // Remove default margin
+          height: 100%;
+          width: 100%;
+      }
+      canvas {
+          width: 100%;
+          height: 100%;
+          display: block; // Remove scrollbars
+      }*/
+    </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+
+// Get canvas and context elements
+let canvas = document.getElementById('canvas');
+canvas.width = 640 //window.innerWidth
+canvas.height = 480 //window.innerHeight
+let ctx = canvas.getContext('2d');
+let w = 640
+let h = 480
+
+// Initialize artwork and paint to canvas
+async function main(params) {
+  let pyodide = await loadPyodide({
+    packages: ["numpy", "matplotlib"]
+  });
+  await pyodide.loadPackage(window.location.origin + "/dist/fractalinator-1.0-py3-none-any.whl");
+  pixelData = new Uint8ClampedArray(
+    pyodide.runPython(`
+      from fractalinator import Artwork
+      from fractalinator.util import createUint8ClampedArray
+      art = Artwork(shape=(${w}, ${h}), cmap_name="jet")
+      createUint8ClampedArray(art.rgb)
+    `).toJs()
+  );
+  imageData = new ImageData(pixelData, w)
+  ctx.putImageData(imageData, 0, 0);
+  console.log("main() complete")
+  return pyodide;
+}
+pyodideReadyPromise = main();
+
+// Track mouse to only draw when left button is down
+let drawing = false;
+document.addEventListener("mousedown", (event) => {
+  if (event.button === 0)  drawing = true; });
+document.addEventListener("mouseup", (event) => {
+  if (event.button === 0)  drawing = false; });
+
+// recalculate frame when mouse is moved
+canvas.addEventListener("mousemove", async (event) => {
+  if (drawing) {
+    let pyodide = await pyodideReadyPromise;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    console.log(`drawing at ${x},${y}`)
+    pixelData = new Uint8ClampedArray(
+      pyodide.runPython(`
+        art.paint_stroke(${x}, ${y})
+        createUint8ClampedArray(art.rgb)
+      `).toJs()
+    );
+    imageData = new ImageData(pixelData, w)
+    ctx.putImageData(imageData, 0, 0);
+  }
+});
+
+  </script>
+</body>
+</html>

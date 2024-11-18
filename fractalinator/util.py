@@ -8,9 +8,9 @@ def createUint8ClampedArray(rgb):
     4hw-byte rgba data array with full opacity.
     """
     h, w, _ = rgb.shape
-    rgba = np.concat((
-        rgb, np.ones((h, w), dtype=np.uint8)
-    ))
+    rgba = np.concatenate(
+        (rgb, 255 * np.ones((h, w, 1), dtype=np.uint8)), axis=2
+    )
     return rgba.tobytes()
 
 
