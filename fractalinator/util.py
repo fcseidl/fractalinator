@@ -10,8 +10,8 @@ def createUint8ClampedArray(rgb):
     h, w, _ = rgb.shape
     rgba = np.concatenate(
         (rgb, 255 * np.ones((h, w, 1), dtype=np.uint8)), axis=2
-    )
-    return rgba.tobytes()
+    ).reshape(-1)
+    return rgba.data
 
 
 def upsample(a, sf: int):

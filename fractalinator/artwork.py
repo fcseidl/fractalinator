@@ -115,7 +115,7 @@ class Artwork:
         return result
 
     def paint_stroke(self, u, v):
-        """Paint at a location."""
+        """Paint at a location. Return the new part of the image."""
         # check boundaries
         if u < 0 or v < 0 or u >= self.w or v >= self.h:
             return
@@ -128,4 +128,5 @@ class Artwork:
         # update rgb
         new_z = self.i2m(new_intensity).astype(complex) * self.buffered_unit[sl]
         self.buffered_rgb[sl] = self.z2rgb(new_z)
+        return self.buffered_rgb[sl]
 
