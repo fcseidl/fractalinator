@@ -52,10 +52,28 @@ pyodideReadyPromise = main();
 
 // Track mouse to only draw when left button is down
 let drawing = false;
+
+let t1;
+let frames = 0;
+
 document.addEventListener("mousedown", (event) => {
-  if (event.button === 0)  drawing = true; });
+  if (event.button === 0) { 
+    drawing = true; 
+
+
+    t1 = performance.now();
+  }
+});
 document.addEventListener("mouseup", (event) => {
-  if (event.button === 0)  drawing = false; });
+  if (event.button === 0) {
+    drawing = false;
+
+
+    let t2 = performance.now();
+    console.log(`${1000 * frames / (t2 - t1)} fps.`);
+    frames = 0;
+  } 
+});
 
 // recalculate frame when mouse is moved
 canvas.addEventListener("mousemove", async (event) => {
@@ -64,24 +82,19 @@ canvas.addEventListener("mousemove", async (event) => {
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    //console.log(`drawing at ${x},${y}`)
-
-    //let t1 = performance.now()
+    
     let proxy = pyodide.runPython(`
-      art.paint_stroke(${x}, ${y})
-      createUint8ClampedArray(art.rgb)
+      rgb = art.paint_stroke(${x}, ${y})
+      createUint8ClampedArray(rgb)
     `)
-    //let t2 = performance.now()
-    //console.log(`Python call took ${t2-t1} ms`)
+    
+    let pixelData = new Uint8ClampedArray(proxy.toJs());
+    let brush_radius = (Math.sqrt(pixelData.length / 4) - 1) / 2
 
-    //t1 = performance.now()
-    let pixelData = new Uint8ClampedArray(
-      proxy.toJs()
-    );
-    imageData = new ImageData(pixelData, canvas.width)
-    ctx.putImageData(imageData, 0, 0);
-    //t2 = performance.now()
-    //console.log(`JS operations took ${t2-t1} ms`)
+    imageData = new ImageData(pixelData, 2 * brush_radius + 1)
+    ctx.putImageData(imageData, x - brush_radius, y - brush_radius);
+
+    frames++;
   }
 });
 
