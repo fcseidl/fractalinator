@@ -4,100 +4,10 @@
     <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
     <title>Draw Something!</title>
-    <style>/*
-      body {
-          margin: 0; // Remove default margin
-          height: 100%;
-          width: 100%;
-      }
-      canvas {
-          width: 100%;
-          height: 100%;
-          display: block; // Remove scrollbars
-      }*/
-    </style>
 </head>
 
 <body>
   <canvas id="canvas"></canvas>
-
-  <script>
-
-// Get canvas and context elements
-let canvas = document.getElementById('canvas');
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-let ctx = canvas.getContext('2d');
-
-// Initialize artwork and paint to canvas
-async function main(params) {
-  let pyodide = await loadPyodide({
-    packages: ["numpy", "matplotlib"]
-  });
-  await pyodide.loadPackage(window.location.origin + "/dist/fractalinator-1.0-py3-none-any.whl");
-  let pixelData = new Uint8ClampedArray(
-    pyodide.runPython(`
-      from fractalinator import Artwork
-      from fractalinator.util import createUint8ClampedArray
-      art = Artwork(shape=(${canvas.width}, ${canvas.height}), cmap_name="jet", brush_strength=90)
-      createUint8ClampedArray(art.rgb)
-    `).toJs()
-  );
-  imageData = new ImageData(pixelData, canvas.width)
-  ctx.putImageData(imageData, 0, 0);
-  console.log("main() complete")
-  return pyodide;
-}
-pyodideReadyPromise = main();
-
-// Track mouse to only draw when left button is down
-let drawing = false;
-
-let t1;
-let frames = 0;
-
-document.addEventListener("mousedown", (event) => {
-  if (event.button === 0) { 
-    drawing = true; 
-
-
-    t1 = performance.now();
-  }
-});
-document.addEventListener("mouseup", (event) => {
-  if (event.button === 0) {
-    drawing = false;
-
-
-    let t2 = performance.now();
-    console.log(`${1000 * frames / (t2 - t1)} fps.`);
-    frames = 0;
-  } 
-});
-
-// recalculate frame when mouse is moved
-canvas.addEventListener("mousemove", async (event) => {
-  if (drawing) {
-    let pyodide = await pyodideReadyPromise;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    let proxy = pyodide.runPython(`
-      rgb = art.paint_stroke(${x}, ${y})
-      createUint8ClampedArray(rgb)
-    `)
-    
-    let pixelData = new Uint8ClampedArray(proxy.toJs());
-    let brush_radius = (Math.sqrt(pixelData.length / 4) - 1) / 2
-
-    imageData = new ImageData(pixelData, 2 * brush_radius + 1)
-    ctx.putImageData(imageData, x - brush_radius, y - brush_radius);
-
-    frames++;
-  }
-});
-
-  </script>
+  <script src="fractalinator.js"></script>
 </body>
 </html>
