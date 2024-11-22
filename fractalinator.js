@@ -1,30 +1,62 @@
 
+// Set up mouseover menu
+const menu = document.getElementById('menu');
+hamburger.addEventListener('mouseenter', () => {
+  menu.style.display = 'block';
+});
+menu.addEventListener('mouseleave', () => {
+  menu.style.display = 'none';
+});
+
 // Get canvas and context elements
 let canvas = document.getElementById('canvas');
-canvas.width = window.innerWidth - 30
-canvas.height = window.innerHeight - 30
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
 let ctx = canvas.getContext('2d');
 
-// Initialize artwork and paint to canvas
-async function main() {
-  let pyodide = await loadPyodide({
-    packages: ["numpy", "matplotlib"]
-  });
-  await pyodide.loadPackage(window.location.origin + "/dist/fractalinator-1.0-py3-none-any.whl");
-  let pixelData = new Uint8ClampedArray(
+// set up Python
+async function getPythonEnv() {
+    let pyodide = await loadPyodide({packages: ["numpy", "matplotlib"]});
+    await pyodide.loadPackage(window.location.origin + "/dist/fractalinator-1.0-py3-none-any.whl");
     pyodide.runPython(`
       from fractalinator import Artwork
       from fractalinator.util import createUint8ClampedArray
-      art = Artwork(shape=(${canvas.width}, ${canvas.height}), cmap_name="jet", brush_strength=90)
-      createUint8ClampedArray(art.rgb)
-    `).toJs()
-  );
-  imageData = new ImageData(pixelData, canvas.width)
-  ctx.putImageData(imageData, 0, 0);
-  console.log("main() complete")
-  return pyodide;
+    `)
+    return pyodide;
 }
-pyodideReadyPromise = main();
+var pyodideReadyPromise = getPythonEnv();
+
+// update entire canvas for new settings or on page load
+async function updateCanvas() {
+    let pyodide = await pyodideReadyPromise;
+    let pixelData = new Uint8ClampedArray(
+        pyodide.runPython(`createUint8ClampedArray(art.rgb)`).toJs()
+    );
+    imageData = new ImageData(pixelData, canvas.width);
+    ctx.putImageData(imageData, 0, 0);
+}
+
+// get user-specified arguments
+function getMenuArgs() {
+  menuArgs = ""
+  for (const id of ["bailout_radius", "brush_radius", "cmap_name", "max_it", "noise_seed", "noise_sig", "power"]) {
+    let elt = document.getElementById(id);
+    let val = elt.id == "cmap_name" ? `'${elt.value}'` : elt.value;
+    menuArgs += `${elt.id}=${val}, `;
+  }
+  console.log(menuArgs);
+  return menuArgs;
+}
+
+// Initialize artwork and paint to canvas
+async function initializeCanvas() {
+    let pyodide = await pyodideReadyPromise;
+    pyodide.runPython(`
+        art = Artwork(${getMenuArgs()}shape=(${canvas.width}, ${canvas.height}))
+    `);
+    updateCanvas();
+}
+initializeCanvas();
 
 // Track mouse to only draw when left button is down
 let drawing = false;
@@ -63,7 +95,7 @@ canvas.addEventListener("mousemove", async (event) => {
       createUint8ClampedArray(rgb)
     `).toJs();
     
-    // update canvas
+    // update only a segment of the canvas
     let pixelData = new Uint8ClampedArray(raw);
     let brush_radius = (Math.sqrt(pixelData.length / 4) - 1) / 2;
     imageData = new ImageData(pixelData, 2 * brush_radius + 1);
@@ -71,16 +103,11 @@ canvas.addEventListener("mousemove", async (event) => {
   }
 });
 
-
 // apply new kwargs when apply button is pressed
 async function onApplyClick() {
     let pyodide = await pyodideReadyPromise;
-    pyodide.runPython(`
-        new_art = Artwork(shape=(${canvas.width}, ${canvas.height}), ${kwargs.value})
-        new_art.buffered_intensity = art.buffered_intensity
-        art = new_art    
-    `)
-
+    pyodide.runPython(`art = Artwork(${getMenuArgs()}intensity=art.intensity)`);
+    updateCanvas();
 }
 document.getElementById("apply-button").setAttribute("onclick", "onApplyClick()");
 

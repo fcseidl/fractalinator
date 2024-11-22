@@ -18,13 +18,15 @@ class Artwork:
     :param cmap_name: matplotlib colormap name to use in image. Default = 'gray_r'.
     :param cmap_period: Smaller values make the colormap repeat more frequently around the
         outside of the fractal. Default = 4.0.
+    :param intensity: Precomputed paint intensity image. Defaults to blank if not specified.
     :param max_it: maximum iteration count for iterative fractal generation. Smaller
         values speed computation but reduce image quality. Default = 30.
     :param noise_seed: If positive integer, random seed for reproducible noise. Default = None.
     :param noise_sig: Smaller values result in more, smaller features in the image. Default = 26.0.
     :param power: Multibrot fractal order. Default is 3. Must be a positive integer.
     :param shape: (width, height) of drawing window in pixels. Note that large windows may exhibit
-        perceptible lag when drawing. Default = (720, 576).
+        perceptible lag when drawing. Default = (720, 576). If intensity is provided,
+        intensity.shape is used instead.
     :param thin_it: Only iterate pixels to max_it if they are not diverged by this iteration,
         saving computation costs. Default = 5.
     """
@@ -34,13 +36,14 @@ class Artwork:
                  brush_radius=100,
                  cmap_name='gray_r',
                  cmap_period=4.0,
+                 intensity=None,
                  max_it=30,
                  noise_seed=None,
                  noise_sig=26.0,
                  power=3,
                  shape=(720, 576),
                  thin_it=5):
-        self.w, self.h, = shape
+        self.h, self.w, = (shape[1], shape[0]) if intensity is None else intensity.shape
         self.buffer, self.power, self.mpl_cmap, self.period, self.bailout_radius, self.thin_it, self.max_it \
             = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, max_it
 
@@ -52,19 +55,21 @@ class Artwork:
 
         # create buffered layers in numpy
         buffered_shape = (2 * brush_radius + self.h, 2 * brush_radius + self.w)
-        self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_intensity = np.zeros(buffered_shape)
+        self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_rgb = np.zeros(buffered_shape + (3,), dtype=np.uint8)
 
         # unbuffered layers
         sl = 2 * (slice(self.buffer, -self.buffer),)
-        self.unit = self.buffered_unit[sl]
         self.intensity = self.buffered_intensity[sl]
+        self.unit = self.buffered_unit[sl]
         self.rgb = self.buffered_rgb[sl]
 
         # initialize layers
+        if intensity is not None:
+            self.intensity += intensity
         self.unit += unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
-        self.rgb += self.z2rgb(self.bailout_radius * self.unit)
+        self.rgb += self.z2rgb(self.i2m(self.intensity) * self.unit)
 
     def t2rgb(self, t):
         """Maps from (smoothed) escape times to rgb space."""
