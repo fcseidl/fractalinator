@@ -67,7 +67,3 @@ canvas {
     border: 1px solid black;
     border-radius: 4px;
 }
-
-.save-canvas {
-    display: none;
-}

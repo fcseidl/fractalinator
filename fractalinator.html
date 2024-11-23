@@ -8,7 +8,6 @@
 </head>
 
 <body>
-  <canvas id="save-canvas"></canvas>
   <canvas id="canvas"></canvas>
   <div class="hamburger-menu" id="hamburger">
     <span></span>
@@ -16,7 +15,7 @@
     <span></span>
   </div>
   <div class="menu" id="menu">
-    <p>Change the settings below.</p>
+    <p>Draw in this window with the mouse. <br>Use this menu to choose settings and save your artwork.</p>
     <div>
         <label for="bailout_radius">bailout radius:</label>
         <input type="text" id="bailout_radius" value="5.0">
@@ -49,7 +48,16 @@
       <label for="power">power:</label>
       <input type="text" id="power" value="2">
     </div>
-    <div><button id="apply-button">Apply New Settings</button></div>
+    <div>
+      <p></p>
+      <button id="apply-button">Apply New Settings</button>
+      <p></p>
+    </div>
+    <div>
+      <button id="save-1">Save Image</button>
+      <button id="save-2">Save with 2x Resolution</button>
+      <button id="save-3">Save with 3x Resolution</button>
+    </div>
   </div>
   <div class="loading" id="loading">
     <p>Loading...</p>
