@@ -3,71 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
     <title>Draw Something!</title>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-      }
-  
-      body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-  
-      canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
-  
-      .hamburger-menu {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 10;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        width: 30px;
-        height: 30px;
-      }
-  
-      .hamburger-menu span {
-        background: black;
-        border: 1px solid white;
-        height: 4px;
-        width: 100%;
-        border-radius: 2px;
-      }
-  
-      .menu {
-        position: absolute;
-        top: 50px;
-        left: 10px;
-        background: white;
-        border: 1px solid black;
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        display: none;
-      }
-  
-      .menu input {
-        width: 200px;
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-    </style>
 </head>
 
 <body>
+  <canvas id="save-canvas"></canvas>
   <canvas id="canvas"></canvas>
   <div class="hamburger-menu" id="hamburger">
     <span></span>
@@ -75,10 +16,10 @@
     <span></span>
   </div>
   <div class="menu" id="menu">
-    <p>Change the settings below to modify the image.</p>
+    <p>Change the settings below.</p>
     <div>
         <label for="bailout_radius">bailout radius:</label>
-        <input type="text" id="bailout_radius" value="3.0">
+        <input type="text" id="bailout_radius" value="5.0">
     </div>
     <div>
         <label for="brush_radius">brush radius:</label>
@@ -87,6 +28,10 @@
     <div>
         <label for="cmap_name">colormap:</label>
         <input type="text" id="cmap_name" value="gray_r">
+    </div>
+    <div>
+      <label for="cmap_period">cycle period:</label>
+      <input type="text" id="cmap_period" value="8.0">
     </div>
     <div>
       <label for="max_it">max iter:</label>
@@ -102,9 +47,12 @@
     </div>
     <div>
       <label for="power">power:</label>
-      <input type="text" id="power" value="3">
+      <input type="text" id="power" value="2">
     </div>
-    <div><button id="apply-button">Apply</button></div>
+    <div><button id="apply-button">Apply New Settings</button></div>
+  </div>
+  <div class="loading" id="loading">
+    <p>Loading...</p>
   </div>
   <script src="fractalinator.js"></script>
 </body>

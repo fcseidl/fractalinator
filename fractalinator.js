@@ -39,7 +39,7 @@ async function updateCanvas() {
 // get user-specified arguments
 function getMenuArgs() {
   menuArgs = ""
-  for (const id of ["bailout_radius", "brush_radius", "cmap_name", "max_it", "noise_seed", "noise_sig", "power"]) {
+  for (const id of ["bailout_radius", "brush_radius", "cmap_name", "cmap_period", "max_it", "noise_seed", "noise_sig", "power"]) {
     let elt = document.getElementById(id);
     let val = elt.id == "cmap_name" ? `'${elt.value}'` : elt.value;
     menuArgs += `${elt.id}=${val}, `;
@@ -55,6 +55,7 @@ async function initializeCanvas() {
         art = Artwork(${getMenuArgs()}shape=(${canvas.width}, ${canvas.height}))
     `);
     updateCanvas();
+    loading.style.display = "none";
 }
 initializeCanvas();
 
@@ -103,11 +104,16 @@ canvas.addEventListener("mousemove", async (event) => {
   }
 });
 
-// apply new kwargs when apply button is pressed
+// apply new kwargs when apply button is pressed, or enter is pressed
 async function onApplyClick() {
     let pyodide = await pyodideReadyPromise;
     pyodide.runPython(`art = Artwork(${getMenuArgs()}intensity=art.intensity)`);
     updateCanvas();
 }
 document.getElementById("apply-button").setAttribute("onclick", "onApplyClick()");
-
+document.addEventListener("keyup", event => {
+  if ((event.key == "Enter") && (menu.style.display != "none")) {
+    menu.style.display = "none";
+    onApplyClick();
+  }
+});

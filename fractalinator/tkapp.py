@@ -4,7 +4,6 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 from .artwork import Artwork
-from .util import upsample
 
 
 def np2image(arr):
@@ -39,16 +38,8 @@ class App:
             savefile = "fractalination-%d.png" % n
             print("Saving current image to %s with resolution increased %d times..."
                   % (savefile, sf))
-            if sf == 1:
-                image = self.image
-            else:
-                ii = upsample(art.intensity, sf)
-                uu = upsample(art.unit, sf)
-                mm = art.i2m(ii)
-                zz = uu * mm
-                rgb = art.z2rgb(zz, max_it=80)  # crisper image
-                image = np2image(rgb)
 
+            image = np2image(art.high_res(sf))
             imgpil = ImageTk.getimage(image)
             imgpil.save(savefile)
             imgpil.close()
@@ -60,8 +51,4 @@ class App:
         root.bind('5', lambda event: save_art(5))
 
         root.mainloop()
-
-
-if __name__ == "__main__":
-    App(cmap_name='jet')
 

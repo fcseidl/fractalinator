@@ -2,7 +2,7 @@
 import numpy as np
 from matplotlib import colormaps
 
-from .util import unit_noise, d2fromcenter
+from .util import unit_noise, d2fromcenter, upsample
 
 
 class Artwork:
@@ -31,16 +31,15 @@ class Artwork:
         saving computation costs. Default = 5.
     """
     def __init__(self, *,
-                 bailout_radius=3.0,
-                 brush_strength=50.0,
+                 bailout_radius=5.0,
                  brush_radius=100,
                  cmap_name='gray_r',
-                 cmap_period=4.0,
+                 cmap_period=8.0,
                  intensity=None,
                  max_it=30,
                  noise_seed=None,
                  noise_sig=26.0,
-                 power=3,
+                 power=2,
                  shape=(720, 576),
                  thin_it=5):
         self.h, self.w, = (shape[1], shape[0]) if intensity is None else intensity.shape
@@ -48,13 +47,14 @@ class Artwork:
             = brush_radius, power, colormaps[cmap_name], cmap_period, bailout_radius, thin_it, max_it
 
         # set up brush
+        strength = 3e-3 * self.buffer ** 2
         d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
-        self.brush = brush_strength / (d2 + 1e-7)  # Laplace smoothed
+        self.brush = strength / (d2 + 1e-7)  # Laplace smoothed
         d2max = d2.max() / 2
         self.brush[d2 > d2max] = 0
 
         # create buffered layers in numpy
-        buffered_shape = (2 * brush_radius + self.h, 2 * brush_radius + self.w)
+        buffered_shape = (2 * self.buffer + self.h, 2 * self.buffer + self.w)
         self.buffered_intensity = np.zeros(buffered_shape)
         self.buffered_unit = np.zeros(buffered_shape, dtype=complex)
         self.buffered_rgb = np.zeros(buffered_shape + (3,), dtype=np.uint8)
@@ -135,3 +135,12 @@ class Artwork:
         self.buffered_rgb[sl] = self.z2rgb(new_z)
         return self.buffered_rgb[sl]
 
+    def high_res(self, sf: int):
+        """Create a copy of the image with sf times the resolution."""
+        if sf == 1:
+            return self.rgb.copy()
+        ii = upsample(self.intensity, sf)
+        uu = upsample(self.unit, sf)
+        mm = self.i2m(ii)
+        zz = uu * mm
+        return self.z2rgb(zz, max_it=100)
