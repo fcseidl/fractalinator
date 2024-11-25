@@ -15,36 +15,41 @@
     <span></span>
   </div>
   <div class="menu" id="menu">
-    <p>Draw in this window with the mouse. <br>Use this menu to choose settings and save your artwork.</p>
-    <div>
+    <p>
+      Draw in this window with the mouse. <br>
+      Use this menu to play with settings and save your artwork. <br>
+      Hover over each setting field for a short description. <br>
+      Documentation on colormaps is available <a href="https://matplotlib.org/stable/gallery/color/colormap_reference.html">here</a>.
+    </p>
+    <div title="Escape threshold for iterative fractal generation. Values near or below 2.0 will add a wavy affect to the background image.">
         <label for="bailout_radius">bailout radius:</label>
         <input type="text" id="bailout_radius" value="5.0">
     </div>
-    <div>
+    <div title="Size of the 'brush' you draw with. Larger values may cause lag.">
         <label for="brush_radius">brush radius:</label>
         <input type="text" id="brush_radius" value="100">
     </div>
-    <div>
+    <div title="matplotlib colormap name--click the link above for more info.">
         <label for="cmap_name">colormap:</label>
         <input type="text" id="cmap_name" value="gray_r">
     </div>
-    <div>
+    <div title="Smaller values make the colors cycle more frequently around the outside of the fractal.">
       <label for="cmap_period">cycle period:</label>
       <input type="text" id="cmap_period" value="8.0">
     </div>
-    <div>
+    <div title="Maximum iteration count for iterative fractal generation. Smaller values speed computation but reduce image quality.">
       <label for="max_it">max iter:</label>
       <input type="text" id="max_it" value="30">
     </div>
-    <div>
+    <div title="Random seed for reproducible noise.">
       <label for="noise_seed">noise seed:</label>
       <input type="text" id="noise_seed" value="42">
     </div>
-    <div>
+    <div title="Smaller values result in tighter patterns in the image.">
       <label for="noise_sig">noise sigma:</label>
       <input type="text" id="noise_sig" value="26.0">
     </div>
-    <div>
+    <div title="Multibrot fractal order--2 is the classic Mandelbrot.">
       <label for="power">power:</label>
       <input type="text" id="power" value="2">
     </div>

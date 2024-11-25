@@ -17,7 +17,11 @@ let ctx = canvas.getContext('2d');
 // set up Python
 async function getPythonEnv() {
     let pyodide = await loadPyodide({packages: ["numpy", "matplotlib"]});
-    await pyodide.loadPackage("https://fcseidl.github.io/fractalinator/fractalinator-1.0-py3-none-any.whl");
+    if (window.location.origin == "https://fcseidl.github.io"){
+      await pyodide.loadPackage("https://fcseidl.github.io/fractalinator/fractalinator-1.0-py3-none-any.whl");
+    } else {
+      await pyodide.loadPackage(window.location.origin + "/docs/fractalinator-1.0-py3-none-any.whl");
+    }
     pyodide.runPython(`
       from fractalinator import Artwork
       from fractalinator.util import createUint8ClampedArray
@@ -25,6 +29,19 @@ async function getPythonEnv() {
     return pyodide;
 }
 var pyodideReadyPromise = getPythonEnv();
+
+// get a random colormap
+async function setRandomCmap() {
+  let pyodide = await pyodideReadyPromise;
+  cmap = pyodide.runPython(`
+    import numpy as np
+    import matplotlib.pyplot as plt
+    str(np.random.choice(plt.colormaps()))
+  `);
+  let cmapInput = document.getElementById("cmap_name");
+  cmapInput.setAttribute("value", cmap);
+}
+setRandomCmap();
 
 // update entire canvas for new settings or on page load
 async function updateCanvas() {
