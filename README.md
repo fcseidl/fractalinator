@@ -38,7 +38,7 @@ The default settings can be changed with a number of keyword arguments. Mostly n
 | **Name** | **Default** | **Description** |
 | -------- | ----------- | --------------- |
 | ```bailout_radius``` | ```5.0``` | Escape threshold for iterative fractal generation. Values near or below 2.0 may allow the noise field to affect the background image. |
-| ```brush_radius``` | ```100``` | May need to be increased to avoid choppy images with higher ```brush_strength```. Larger values slow drawing. |
+| ```brush_radius``` | ```100``` | Size of the "brush" you draw with. Larger values slow drawing. |
 | ```cmap_name``` | ```"gray_r"``` | ```matplotlib``` colormap name to use in image. |
 | ```cmap_period``` | ```8.0``` | Smaller values make the colormap repeat more frequently around the outside of the fractal.|
 | ```max_it``` | ```30``` | Maximum iteration count for iterative fractal generation. Smaller values speed computation but reduce image quality. |
