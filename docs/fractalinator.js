@@ -17,7 +17,7 @@ let ctx = canvas.getContext('2d');
 // set up Python
 async function getPythonEnv() {
     let pyodide = await loadPyodide({packages: ["numpy", "matplotlib"]});
-    await pyodide.loadPackage(window.location.origin + "/dist/fractalinator-1.0-py3-none-any.whl");
+    await pyodide.loadPackage(window.location.origin + "/docs/fractalinator-1.0-py3-none-any.whl");
     pyodide.runPython(`
       from fractalinator import Artwork
       from fractalinator.util import createUint8ClampedArray
