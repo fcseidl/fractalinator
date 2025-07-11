@@ -52,6 +52,7 @@ class Artwork:
         self.brush = strength / (d2 + 1e-7)  # Laplace smoothed
         d2max = d2.max() / 2
         self.brush[d2 > d2max] = 0
+        self.erasing = False
 
         # create buffered layers in numpy
         buffered_shape = (2 * self.buffer + self.h, 2 * self.buffer + self.w)
@@ -129,6 +130,8 @@ class Artwork:
         sl = (slice(v, v + 2 * self.buffer + 1), slice(u, u + 2 * self.buffer + 1))
         new_intensity = self.buffered_intensity[sl]
         new_intensity += self.brush
+        if self.erasing:
+            new_intensity = np.maximum(1e-7, new_intensity)
 
         # update rgb
         new_z = self.i2m(new_intensity).astype(complex) * self.buffered_unit[sl]
@@ -144,3 +147,8 @@ class Artwork:
         mm = self.i2m(ii)
         zz = uu * mm
         return self.z2rgb(zz, max_it=100)
+
+    def toggle_draw_erase(self):
+        """Change whether the brush is adding to or erasing from the artwork."""
+        self.brush *= -1
+        self.erasing = not self.erasing

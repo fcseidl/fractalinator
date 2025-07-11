@@ -21,6 +21,8 @@ class App:
         self.image = np2image(art.rgb)
         image_item = canvas.create_image(0, 0, anchor="nw", image=self.image)
 
+        # set up drawing event listener
+
         def on_b1_motion(event):
             u, v = event.x, event.y
             art.paint_stroke(u, v)
@@ -29,6 +31,8 @@ class App:
 
         canvas.bind("<B1-Motion>", on_b1_motion)
         canvas.pack()
+
+        # set up save event listeners
 
         def save_art(sf: int):
             """Save a png image of the current frame with resolution increased sf times."""
@@ -49,6 +53,9 @@ class App:
         root.bind('3', lambda event: save_art(3))
         root.bind('4', lambda event: save_art(4))
         root.bind('5', lambda event: save_art(5))
+
+        # set up draw/erase listener on spacebar press
+        root.bind('<space>', lambda event: art.toggle_draw_erase())
 
         root.mainloop()
 
