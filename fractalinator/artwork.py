@@ -131,7 +131,12 @@ class Artwork:
         new_intensity = self.buffered_intensity[sl]
         new_intensity += self.brush
         if self.erasing:
-            new_intensity = np.maximum(1e-7, new_intensity)
+            # eraser cannot reduce intensity below zero
+            new_intensity[new_intensity < 0.] = 0.
+        else:
+            # intensity >= 16 guarantees a modulus <= 0.25, which is inside
+            # the mandelbrot set.
+            new_intensity[new_intensity > 16.] = 16.
 
         # update rgb
         new_z = self.i2m(new_intensity).astype(complex) * self.buffered_unit[sl]
