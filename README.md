@@ -10,11 +10,15 @@ https://github.com/user-attachments/assets/bca13855-29b0-4c92-9ce6-bf94ea0d238d
 
 
 
-## What's going on
+## Web application
+I gave a talk on the fractalinator's web deployment in August '25 for the Puget Sound Programming Python (PuPPy) user group. See it on [YouTube](https://www.youtube.com/watch?v=DaZUcxD6iJc)!
+
 Your browser runs the fractalinator app using the four files in the ```/docs``` folder. Three of these are the usual `index.html`, with a CSS stylesheet, and a javascript to handle the interactivity. The fourth is a wheel for the ```fractalinator``` Python package, built from source code in this repository. This package controls the fractal image, performing numerical computation which would be slow and cumbersome in Javascript. Python methods are called from Javascript using [pyodide](https://pyodide.org/en/stable/index.html), a WASM Python interpreter.
 
 ![fractalinator](gallery/designdiagram.png)
 
+
+## Python package
 You can also install the `fractalinator` package to your Python environment using 
 ```
 pip install git+https://github.com/fcseidl/fractalinator/
