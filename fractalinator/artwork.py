@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import colormaps
 from cnvlnoise import distfromcenter
 
-from .util import unit_noise, d2fromcenter, upsample
+from .util import unit_noise, upsample
 
 
 class Artwork:
@@ -70,7 +70,10 @@ class Artwork:
         # initialize layers
         if intensity is not None:
             self.intensity += intensity
-        self.unit += unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
+        self.unit += unit_noise(
+            shape=(self.h, self.w),
+            radial_func=lambda x: np.exp(-noise_sig * x * x),
+            seed=noise_seed)
         self.rgb += self.z2rgb(self.i2m(self.intensity) * self.unit)
 
     def t2rgb(self, t):
