@@ -39,7 +39,7 @@ class Artwork:
                  intensity=None,
                  max_it=30,
                  noise_seed=None,
-                 noise_sig=26.0,
+                 noise_sig=0.06,
                  power=2,
                  shape=(720, 576),
                  thin_it=5):
@@ -70,9 +70,10 @@ class Artwork:
         # initialize layers
         if intensity is not None:
             self.intensity += intensity
+        siginv2 = 1. / (noise_sig * noise_sig)
         self.unit += unit_noise(
             shape=(self.h, self.w),
-            radial_func=lambda x: np.exp(-noise_sig * x * x),
+            radial_func=lambda x: np.exp(-siginv2 * x * x),
             seed=noise_seed)
         self.rgb += self.z2rgb(self.i2m(self.intensity) * self.unit)
 
