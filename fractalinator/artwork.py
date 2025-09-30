@@ -1,6 +1,7 @@
 
 import numpy as np
 from matplotlib import colormaps
+from cnvlnoise import distfromcenter
 
 from .util import unit_noise, d2fromcenter, upsample
 
@@ -48,7 +49,7 @@ class Artwork:
 
         # set up brush
         strength = 3e-3 * self.buffer ** 2
-        d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
+        d2 = distfromcenter((2 * self.buffer + 1, 2 * self.buffer + 1)) ** 2
         self.brush = strength / (d2 + 1e-7)  # Laplace smoothed
         d2max = d2.max() / 2
         self.brush[d2 > d2max] = 0
