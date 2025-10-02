@@ -16,7 +16,11 @@ let ctx = canvas.getContext('2d');
 
 // set up Python
 async function getPythonEnv() {
+    console.log("Loading convolved noise...")
     let pyodide = await loadPyodide({packages: ["numpy", "matplotlib"]});
+    await pyodide.loadPackage("micropip");
+    const micropip = pyodide.pyimport("micropip");
+    await micropip.install("convolved-noise");
     if (window.location.origin == "https://fcseidl.github.io"){
       await pyodide.loadPackage("https://fcseidl.github.io/fractalinator/fractalinator-1.0-py3-none-any.whl");
     } else {
