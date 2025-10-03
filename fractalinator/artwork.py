@@ -1,8 +1,9 @@
 
 import numpy as np
 from matplotlib import colormaps
+from cnvlnoise import distfromcenter
 
-from .util import unit_noise, d2fromcenter, upsample
+from .util import unit_noise, upsample
 
 
 class Artwork:
@@ -38,7 +39,7 @@ class Artwork:
                  intensity=None,
                  max_it=30,
                  noise_seed=None,
-                 noise_sig=26.0,
+                 noise_sig=0.06,
                  power=2,
                  shape=(720, 576),
                  thin_it=5):
@@ -48,10 +49,11 @@ class Artwork:
 
         # set up brush
         strength = 3e-3 * self.buffer ** 2
-        d2 = d2fromcenter((2 * self.buffer + 1, 2 * self.buffer + 1))
+        d2 = distfromcenter((2 * self.buffer + 1, 2 * self.buffer + 1)) ** 2
         self.brush = strength / (d2 + 1e-7)  # Laplace smoothed
         d2max = d2.max() / 2
         self.brush[d2 > d2max] = 0
+        self.erasing = False
 
         # create buffered layers in numpy
         buffered_shape = (2 * self.buffer + self.h, 2 * self.buffer + self.w)
@@ -68,7 +70,11 @@ class Artwork:
         # initialize layers
         if intensity is not None:
             self.intensity += intensity
-        self.unit += unit_noise(shape=(self.h, self.w), resolution=1, rbf_sigma=noise_sig, seed=noise_seed)
+        siginv2 = 1. / (noise_sig * noise_sig)
+        self.unit += unit_noise(
+            shape=(self.h, self.w),
+            radial_func=lambda x: np.exp(-siginv2 * x * x),
+            seed=noise_seed)
         self.rgb += self.z2rgb(self.i2m(self.intensity) * self.unit)
 
     def t2rgb(self, t):
@@ -129,6 +135,13 @@ class Artwork:
         sl = (slice(v, v + 2 * self.buffer + 1), slice(u, u + 2 * self.buffer + 1))
         new_intensity = self.buffered_intensity[sl]
         new_intensity += self.brush
+        if self.erasing:
+            # eraser cannot reduce intensity below zero
+            new_intensity[new_intensity < 0.] = 0.
+        else:
+            # intensity >= 16 guarantees a modulus <= 0.25, which is inside
+            # the mandelbrot set.
+            new_intensity[new_intensity > 16.] = 16.
 
         # update rgb
         new_z = self.i2m(new_intensity).astype(complex) * self.buffered_unit[sl]
@@ -144,3 +157,8 @@ class Artwork:
         mm = self.i2m(ii)
         zz = uu * mm
         return self.z2rgb(zz, max_it=100)
+
+    def toggle_draw_erase(self):
+        """Change whether the brush is adding to or erasing from the artwork."""
+        self.brush *= -1
+        self.erasing = not self.erasing
