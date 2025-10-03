@@ -125,6 +125,21 @@ canvas.addEventListener("mousemove", async (event) => {
   }
 });
 
+// event listener for eraser button
+let eraserButton = document.getElementById("toggle-eraser")
+eraserButton.addEventListener("click", async event => {
+    let pyodide = await pyodideReadyPromise;
+    let erasing = pyodide.runPython(`
+      art.toggle_draw_erase()
+      art.erasing
+    `);
+    if (erasing) {
+      eraserButton.innerText = "Eraser ON"
+    } else {
+      eraserButton.innerText = "Eraser OFF"
+    }
+});
+
 // apply new kwargs when apply button is pressed, or enter is pressed
 async function onApplyClick() {
     let pyodide = await pyodideReadyPromise;
