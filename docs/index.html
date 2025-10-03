@@ -45,7 +45,7 @@
       <label for="noise_seed">noise seed:</label>
       <input type="text" id="noise_seed" value="42">
     </div>
-    <div title="Smaller values result in tighter patterns in the image.">
+    <div title="Smaller values result in tighter patterns in the image. Cannot exceed ~0.32.">
       <label for="noise_sig">noise sigma:</label>
       <input type="text" id="noise_sig" value="0.05">
     </div>
@@ -64,9 +64,7 @@
       <button id="save-3">Save with 3x Resolution</button>
     </div>
   </div>
-  <div class="loading" id="loading">
-    <p>Loading...</p>
-  </div>
+  <p>Loading... when this text disappears, draw something with the mouse!</p>
   <script src="fractalinator.js"></script>
 </body>
 </html>
