@@ -16,16 +16,10 @@ let ctx = canvas.getContext('2d');
 
 // set up Python
 async function getPythonEnv() {
-    console.log("Loading convolved noise...")
-    let pyodide = await loadPyodide({packages: ["numpy", "matplotlib"]});
+    let pyodide = await loadPyodide();
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
-    await micropip.install("convolved-noise");
-    if (window.location.origin == "https://fcseidl.github.io"){
-      await pyodide.loadPackage("https://fcseidl.github.io/fractalinator/fractalinator-1.0-py3-none-any.whl");
-    } else {
-      await pyodide.loadPackage(window.location.origin + "/docs/fractalinator-1.0-py3-none-any.whl");
-    }
+    await micropip.install("fractalinator");
     pyodide.runPython(`
       from fractalinator import Artwork
       from fractalinator.util import createUint8ClampedArray
@@ -76,7 +70,6 @@ async function initializeCanvas() {
         art = Artwork(${getMenuArgs()}shape=(${canvas.width}, ${canvas.height}))
     `);
     updateCanvas();
-    loading.style.display = "none";
 }
 initializeCanvas();
 
