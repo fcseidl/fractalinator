@@ -17,17 +17,24 @@ https://github.com/user-attachments/assets/bca13855-29b0-4c92-9ce6-bf94ea0d238d
 
 
 ## Web application
-Your browser runs the fractalinator app using the four files in the ```/docs``` folder. Three of these are the usual `index.html`, with a CSS stylesheet, and a javascript to handle the interactivity. The fourth is a wheel for the ```fractalinator``` Python package, built from source code in this repository. This package controls the fractal image, performing numerical computation which would be slow and cumbersome in Javascript. Python methods are called from Javascript using [pyodide](https://pyodide.org/en/stable/index.html), a WASM Python interpreter.
+The `fractalinator` is implemented in Python, since numerical computation it performs would be slow and cumbersome in Javascript. Despite this, no server is required to run the Python code. 
+Python calls are executed in the browser by a Javascript wrapper, via [pyodide](https://pyodide.org/en/stable/index.html), a WASM Python interpreter.
 
 ![fractalinator](gallery/designdiagram.png)
 
 
 ## Python package
-You can also install the `fractalinator` package to your Python environment using 
+The `fractalinator` package is registered on PyPI. Run
 ```
-pip install git+https://github.com/fcseidl/fractalinator/
+pip install fractalinator
 ```
-You can run the `demo.py` module to open a fractalinator canvas in a Tkinter widget, outside the browser.
+Then, in a Python console,
+```
+>>> from fractalinator import App
+>>> App()
+```
+If Tkinter is available, this will open a drawing canvas in a separate window. The modifiable values in the hamburger menu of the web app can be passed as keyword arguments. 
+Spacebar toggles the eraser, and the 1 key saves the image. To save with 2x the resolution, press 2. The 3, 4, and 5 keys are analogous.
 
 ## Is the name a *Phineas and Ferb* reference?
 Yes. Yes it is.
