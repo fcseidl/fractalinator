@@ -1,8 +1,10 @@
 UPDATES:
 
-8/25 I gave a talk on the fractalinator's web deployment for the Puget Sound Programming Python (PuPPy) user group. See it on [YouTube](https://www.youtube.com/watch?v=DaZUcxD6iJc)!
+10/25 The web app now supports touch screens!
 
 10/25 The algorithm used to create random noise to texture the fractalinations is now distrubuted as a separate package, which can be installed from PyPI. It's source repo is https://github.com/fcseidl/convolved-noise.
+
+8/25 I gave a talk on the fractalinator's web deployment for the Puget Sound Programming Python (PuPPy) user group. See it on [YouTube](https://www.youtube.com/watch?v=DaZUcxD6iJc)!
 
 # Fractalinator
 
