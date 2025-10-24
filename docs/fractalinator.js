@@ -7,6 +7,14 @@ hamburger.addEventListener('mouseenter', () => {
 menu.addEventListener('mouseleave', () => {
   menu.style.display = 'none';
 });
+hamburger.addEventListener('touchstart', () => {
+  if (menu.style.display == 'block') {
+    menu.style.display = 'none';
+  }
+  else {
+    menu.style.display = 'block';
+  }
+});
 
 // Get canvas and context elements
 let canvas = document.getElementById('canvas');
@@ -94,6 +102,9 @@ function clamp(value, lo, hi) {
 }
 
 async function drawStroke(x, y) {
+  // don't display menu while drawing
+  menu.style.display = "none";
+
   // call Python to modify image
   let pyodide = await pyodideReadyPromise;
   let raw = pyodide.runPython(`
@@ -107,7 +118,6 @@ async function drawStroke(x, y) {
   let imageData = new ImageData(pixelData, 2 * brush_radius + 1);
   ctx.putImageData(imageData, x - brush_radius, y - brush_radius);
 }
-
 
 // recalculate frame when mouse is moved
 canvas.addEventListener("mousemove", async (event) => {
