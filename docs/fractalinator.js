@@ -93,30 +93,42 @@ function clamp(value, lo, hi) {
     return value;
 }
 
+async function drawStroke(x, y) {
+  // call Python to modify image
+  let pyodide = await pyodideReadyPromise;
+  let raw = pyodide.runPython(`
+    rgb = art.paint_stroke(${x}, ${y})
+    createUint8ClampedArray(rgb)
+  `).toJs();
+  
+  // update only a segment of the canvas
+  let pixelData = new Uint8ClampedArray(raw);
+  let brush_radius = (Math.sqrt(pixelData.length / 4) - 1) / 2;
+  let imageData = new ImageData(pixelData, 2 * brush_radius + 1);
+  ctx.putImageData(imageData, x - brush_radius, y - brush_radius);
+}
+
+
 // recalculate frame when mouse is moved
 canvas.addEventListener("mousemove", async (event) => {
   if (drawing) {
-    // get motion location
     const rect = canvas.getBoundingClientRect();
     let x = Math.round(event.clientX - rect.left);
     let y = Math.round(event.clientY - rect.top);
     x = clamp(x, 0, canvas.width);
     y = clamp(y, 0, canvas.height);
-
-    // call Python to modify image
-    let pyodide = await pyodideReadyPromise;
-    let raw = pyodide.runPython(`
-      rgb = art.paint_stroke(${x}, ${y})
-      createUint8ClampedArray(rgb)
-    `).toJs();
-    
-    // update only a segment of the canvas
-    let pixelData = new Uint8ClampedArray(raw);
-    let brush_radius = (Math.sqrt(pixelData.length / 4) - 1) / 2;
-    let imageData = new ImageData(pixelData, 2 * brush_radius + 1);
-    ctx.putImageData(imageData, x - brush_radius, y - brush_radius);
+    drawStroke(x, y);
   }
 });
+// recalculate frame on touchmove
+canvas.addEventListener("touchmove", async (event) => {
+  const rect = canvas.getBoundingClientRect();
+  let x = Math.round(event.changedTouches[0].clientX - rect.left);
+  let y = Math.round(event.changedTouches[0].clientY - rect.top);
+  x = clamp(x, 0, canvas.width);
+  y = clamp(y, 0, canvas.height);
+  drawStroke(x, y);
+})
 
 // event listener for eraser button
 let eraserButton = document.getElementById("toggle-eraser")
