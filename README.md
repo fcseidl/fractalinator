@@ -20,10 +20,7 @@ https://github.com/user-attachments/assets/bca13855-29b0-4c92-9ce6-bf94ea0d238d
 
 ## Web application
 The `fractalinator` is implemented in Python, since numerical computation it performs would be slow and cumbersome in Javascript. Despite this, no server is required to run the Python code. 
-Python calls are executed in the browser by a Javascript wrapper, via [pyodide](https://pyodide.org/en/stable/index.html), a WASM Python interpreter.
-
-![fractalinator](gallery/designdiagram.png)
-
+Python calls are executed in the browser by a Javascript wrapper, via [pyodide](https://pyodide.org/en/stable/index.html), a WASM Python interpreter. The website is hosted at [https://fcseidl.github.io/fractalinator/](https://fcseidl.github.io/fractalinator/).
 
 ## Python package
 The `fractalinator` package is registered on PyPI. Run
